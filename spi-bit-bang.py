@@ -1,9 +1,11 @@
 from pyftdi.gpio import GpioSyncController
 from pyftdi.gpio import GpioAsyncController
 import time
+import sys
+
 
 class BitBangSPI:
-	def __init__(self, device, SCLK, MOSI, MISO, CS, defaultDirection, defaultState):
+	def __init__(self, device, SCLK, MOSI, MISO, CS, defaultDirection, defaultState, transactionList, frequency=1e4):
 		self.device = device
 		self.SCLK = SCLK
 		self.MOSI = MOSI
@@ -16,6 +18,16 @@ class BitBangSPI:
 		self.directionArray = bytearray()
 		self.directionArray.append(self.defaultDirection)
 		self.rxArray = bytearray()
+		for aTransaction in transactionList:
+			self.insertDelay(4)
+			self.clockLow()
+			self.csLow()
+			for aByte in aTransaction:
+				self.writeByte(aByte)
+			self.csHigh()
+			self.clockLow()
+			self.insertDelay(4)
+		self.transmitSync(frequency)
 	def insertDelay(self, d, directionMask=0xff):
 		for i in range(d):
 			self.txArray.append(self.txArray[-1])
@@ -50,7 +62,7 @@ class BitBangSPI:
 			self.clockHigh(directionMask)
 	def getTxArray(self):
 		return self.txArray
-	def transmitSync(self, frequency=1e3):
+	def transmitSync(self, frequency):
 		gpio = GpioSyncController()
 		gpio.configure(self.device, self.directionArray[0], frequency=frequency)
 		self.rxArray = gpio.exchange( self.txArray );
@@ -79,7 +91,10 @@ class BitBangSPI:
 		return self.rxArray
 	def getDirectionArray(self):
 		return self.directionArray
-			
+
+
+		
+		
 			
 			
 			
@@ -151,39 +166,13 @@ def displayData(bb): #must all be same length
 	print()
 
 
-def spiTransaction(transactionList):
-	sckMask = 0x10
-	sdioMask = 0x20
-	sdoMask = 0x40
-	csMask = 0x80
-	txBytes = BitBangSPI('ftdi:///2', sckMask, sdioMask, sdoMask, csMask, defaultDirection=0xBB, defaultState=0x88) 
-
-	### Convert transactionList into txBytes array (bit-bang) ###
-	for aTransaction in transactionList:
-		txBytes.insertDelay(4)
-		txBytes.clockLow()
-		txBytes.csLow()
-		# SPI control and address bytes
-		txBytes.writeByte(aTransaction[0])
-		txBytes.writeByte(aTransaction[1])
-		# Data byte
-		txBytes.writeByte(aTransaction[2])
-#		if (aTransaction[0] & 0x80):
-#			txBytes.writeByte(aTransaction[2], directionMask=(~0x20)) # reconfigure pin 0x20 as input
-#		else:
-#			txBytes.writeByte(aTransaction[2])
-		txBytes.csHigh()
-		txBytes.clockLow()
-		txBytes.insertDelay(4)
-	### SPI send and receive ###
-	txBytes.transmitSync(frequency=10000)
-	#txBytes.transmitAsync()
-	displayData( txBytes );
 
 
 
 
-write4wire =	[[0x00,0x00,0x10],\
+
+
+write4wire =	[[0x00,0x00,0x10], #test \
 				[0x01,0x38,0x40],\
 				[0x01,0x3F,0x00],\
 				[0x01,0x40,0xF0],\
@@ -200,13 +189,16 @@ read4wire =		[[0x00,0x00,0x10],\
 				[0x01,0x4A,0x00],\
 				[0x81,0x73,0x00]]
 
+minWrite4wire =	[[0x00,0x00,0x10],\
+				[0x01,0x4A,0x33]]
 
 readAll4wire = 	[[0x00,0x00,0x10],\
+				[0x01,0x4A,0x33],\
 				[0x80,0x02,0x00],\
 				[0x80,0x03,0x00],\
 				[0x80,0x04,0x00],\
 				[0x80,0x05,0x00],\
-				[0x80,0x06,0x00],\
+				[0x80,0x06,0x00], # test \
 				[0x80,0x0C,0x00],\
 				[0x80,0x0D,0x00],\
 				[0x81,0x00,0x00],\
@@ -347,12 +339,33 @@ read3wire =		[[0x00,0x00,0x80],\
 
 
 
+sckMask = 0x10
+sdioMask = 0x20
+sdoMask = 0x40
+csMask = 0x80
 
-#for i in range(100):
-spiTransaction(write4wire); # write
-spiTransaction(readAll4wire); # read
-#	time.sleep(.1)
-	
+
+def stdinSPI():
+	writeList =	[[0x00,0x00,0x10],\
+				[0x01,0x4A,0x33]]
+	while 1:
+		input = sys.stdin.readline()
+		if len(input) <= 1:
+			break
+		writeList.append( bytearray.fromhex(input) )
+	transaction = BitBangSPI('ftdi:///2', sckMask, sdioMask, sdoMask, csMask, 0xBB, 0x88, writeList)
+	displayData( transaction )
+		
+
+
+
+sckMask = 0x10
+sdioMask = 0x20
+sdoMask = 0x40
+csMask = 0x80
+txBytes = BitBangSPI('ftdi:///2', sckMask, sdioMask, sdoMask, csMask, 0xBB, 0x88, readAll4wire) 
+displayData( txBytes )
+
 
 
 

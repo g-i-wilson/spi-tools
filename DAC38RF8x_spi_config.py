@@ -8,7 +8,8 @@ import sys
 # data structure format: [ [ADDR, upper_byte, lower_byte], [...], ... ]
 defaultMap =    [ \
                 [0x00, 0x58, 0x03], # RESET_CONFIG Chip Reset and Configuration 8.5.1 \
-                [0x01, 0x18, 0x00], # IO_CONFIG IO Configuration 8.5.2 \
+                # [0x01, 0x18, 0x00], # IO_CONFIG IO Configuration 8.5.2 \
+                [0x01, 0x18, 0x80], # ***Added 4-Wire SPI bit to default *** \
                 [0x02, 0xFF, 0xFF], # ALM_SD_MASK Lane Signal Detect Alarm Mask 8.5.3 \
                 [0x03, 0xFF, 0xFF], # ALM_CLK_MASK Clock Alarms Mask 8.5.4 \
                 [0x04, 0x00, 0x00], # variable (1) ALM_SD_DET SERDES Loss of Signal Detection Alarms 8.5.5 \
@@ -144,13 +145,6 @@ spi.configure('ftdi:///2')
 # Get a port to a SPI slave w/ /CS on A*BUS3 and SPI mode 0 @ 12MHz
 slave = spi.get_port(cs=0, freq=1E6, mode=0)
 
-# Request the JEDEC ID from the SPI slave
-# jedec_id = slave.exchange([0x9f], 3)
-def formatBytes(bytes, orMasks):
-    newBytes = bytearray();
-    for i in range(len(bytes)):
-        newBytes.append(bytes[i] | orMasks[i])
-    return newBytes
 
 
 def writeReg(reg, upper=0x00, lower=0x00, cs_start=True, cs_stop=True):
@@ -189,19 +183,22 @@ def bitOff(reg, upperBitMask, lowerBitMask):
 	return readReg(reg)
 
 
+def enable4Wire():
+	# Enables the 4-wire SPI read mode
+	writeReg( 0x01, 0x00, 0x80 )
+
 def readAll():
 	for aReg in defaultMap:
 		printReg( aReg[0], readReg( aReg[0] ) )
-
 
 def enableAll():
 	# Enabled all register "pages" for reading/writing
 	writeReg( 0x09, 0x00, 0x07 )
 
+def spiReset():
+	writeReg( 0x00, 0x80, 0x00 )
 
-
-# 4-wire SPI mode
-writeReg( 0x01, 0x00, 0x80 )
+enable4Wire()
 enableAll()
 # readAll()
 
@@ -210,13 +207,17 @@ ui = [""]
 print("**** DAC38RF8x SPI Register Config ****")
 print()
 print("Command set:")
-print("readReg  <ADDR>                          | Read register")
 print("writeReg <ADDR> <upperByte> <lowerByte>  | Write register")
-print("bitOn <ADDR> <upperMask> <lowerMask>     | Set bit to 1")
-print("bitOff <ADDR> <upperMask> <lowerMask>    | Set bit to 0")
+print("enable4Wire                              | Enables 4-wire mode (called when program starts)")
+print("readReg <ADDR>                           | Read register (4-wire mode only)")
+print("bitOn <ADDR> <upperMask> <lowerMask>     | Set bit to 1 (4-wire mode only)")
+print("bitOff <ADDR> <upperMask> <lowerMask>    | Set bit to 0 (4-wire mode only)")
 print("readAll                                  | Read all registers")
-print("save <fileName>                          | Save registers to a file")
+print("enableAll                                | Enable all register pages")
+print("save <fileName>                          | Save registers to a file (4-wire mode only)")
 print("load <fileName>                          | Load and write registers from a file")
+print("loadDefault                              | Load datasheet default configuration")
+print("spiReset                                 | Write 0x80 0x00 to address 0x00")
 print("exit                                     | Exit the program")
 print()
 print()
@@ -252,7 +253,14 @@ while (ui[0] != "exit"):
 		inputFile.close()
 		readAll()
 	if (ui[0] == "loadDefault"):
-		enableAll()
 		for aReg in defaultMap:
 			writeReg(aReg[0], aReg[1], aReg[2])
+		enableAll()
 		readAll()
+	if (ui[0] == "enableAll"):
+		enableAll()
+		readAll()
+	if (ui[0] == "spiReset"):
+		spiReset()
+	if (ui[0] == "enable4Wire"):
+		enable4Wire()

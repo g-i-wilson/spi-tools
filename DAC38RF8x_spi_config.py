@@ -203,10 +203,23 @@ def enableAll():
 # 4-wire SPI mode
 writeReg( 0x01, 0x00, 0x80 )
 enableAll()
-readAll()
+# readAll()
 
 
 ui = [""]
+print("**** DAC38RF8x SPI Register Config ****")
+print()
+print("Command set:")
+print("readReg  <ADDR>                          | Read register")
+print("writeReg <ADDR> <upperByte> <lowerByte>  | Write register")
+print("bitOn <ADDR> <upperMask> <lowerMask>     | Set bit to 1")
+print("bitOff <ADDR> <upperMask> <lowerMask>    | Set bit to 0")
+print("readAll                                  | Read all registers")
+print("save <fileName>                          | Save registers to a file")
+print("load <fileName>                          | Load and write registers from a file")
+print("exit                                     | Exit the program")
+print()
+print()
 
 while (ui[0] != "exit"):
 	ui = sys.stdin.readline().rstrip().split(' ')
@@ -237,4 +250,9 @@ while (ui[0] != "exit"):
 			reg = regData.rstrip().split(',')
 			writeReg(int(reg[0],16), int(reg[1],16), int(reg[2],16))
 		inputFile.close()
+		readAll()
+	if (ui[0] == "loadDefault"):
+		enableAll()
+		for aReg in defaultMap:
+			writeReg(aReg[0], aReg[1], aReg[2])
 		readAll()

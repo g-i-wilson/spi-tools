@@ -1,0 +1,111 @@
+**** DAC38RF8x SPI Register Config ****
+
+Command set:
+writeReg <ADDR> <upperByte> <lowerByte>  | Write register
+enable4Wire                              | Enables 4-wire mode (called when program starts)
+readReg <ADDR>                           | Read register (4-wire mode only)
+bitOn <ADDR> <upperMask> <lowerMask>     | Set bit to 1 (4-wire mode only)
+bitOff <ADDR> <upperMask> <lowerMask>    | Set bit to 0 (4-wire mode only)
+readAll                                  | Read all registers
+enableAll                                | Enable all register pages
+save <fileName>                          | Save registers to a file (4-wire mode only)
+load <fileName>                          | Load and write registers from a file
+loadDefault                              | Load datasheet default configuration
+spiReset                                 | Write 0x80 0x00 to address 0x00
+exit                                     | Exit the program
+
+
+readAll
+0x00: 0x58, 0x60 _ 1 _ 1 1 _ _ _    _ 1 1 _ _ _ _ _  RESET_CONFIG Chip Reset and Configuration 8.5.1
+0x01: 0x00, 0x80 _ _ _ _ _ _ _ _    1 _ _ _ _ _ _ _  IO_CONFIG IO Configuration 8.5.2
+0x02: 0xff, 0xff 1 1 1 1 1 1 1 1    1 1 1 1 1 1 1 1  ALM_SD_MASK Lane Signal Detect Alarm Mask 8.5.3
+0x03: 0xff, 0xf3 1 1 1 1 1 1 1 1    1 1 1 1 _ _ 1 1  ALM_CLK_MASK Clock Alarms Mask 8.5.4
+0x04: 0x00, 0xff _ _ _ _ _ _ _ _    1 1 1 1 1 1 1 1  variable (1) ALM_SD_DET SERDES Loss of Signal Detection Alarms 8.5.5
+0x05: 0x00, 0x03 _ _ _ _ _ _ _ _    _ _ _ _ _ _ 1 1  variable (1) ALM_SYSREF_DET SYSREF Alignment Circuit Alarms 8.5.6
+0x06: 0x41, 0xe2 _ 1 _ _ _ _ _ 1    1 1 1 _ _ _ 1 _  variable TEMP_PLLVOLT Temperature Sensor and PLL Loop Voltage 8.5.7
+0x09: 0x00, 0x07 _ _ _ _ _ _ _ _    _ _ _ _ _ 1 1 1  PAGE_SET Page Set
+0x78: 0x00, 0x00 _ _ _ _ _ _ _ _    _ _ _ _ _ _ _ _  SYSREF_ALIGN_R SYSERF Align to r1 and r3 Count 8.5.9
+0x79: 0x00, 0x00 _ _ _ _ _ _ _ _    _ _ _ _ _ _ _ _  SYSREF12_CNT SYSREF Phase Count 1 and 2 8.5.10
+0x7a: 0x00, 0x00 _ _ _ _ _ _ _ _    _ _ _ _ _ _ _ _  SYSREF34_CNT SYSREF Phase Count 3 and 4
+0x7f: 0x80, 0x09 1 _ _ _ _ _ _ _    _ _ _ _ 1 _ _ 1  VENDOR_VER Vendor ID and Chip Version
+0x0a: 0xfe, 0x13 1 1 1 1 1 1 1 _    _ _ _ 1 _ _ 1 1  MULTIDUC_CFG1 Multi-DUC Configuration (PAP, Interpolation)
+0x0c: 0xa4, 0x02 1 _ 1 _ _ 1 _ _    _ _ _ _ _ _ 1 _  MULTIDUC_CFG2 Multi-DUC Configuration (Mixers) 8.5.14
+0x0d: 0xf0, 0x00 1 1 1 1 _ _ _ _    _ _ _ _ _ _ _ _  JESD_FIFO JESD FIFO Control 8.5.15
+0x0e: 0x00, 0xff _ _ _ _ _ _ _ _    1 1 1 1 1 1 1 1  ALM_MASK1 Alarm Mask 1 8.5.16
+0x0f: 0xff, 0xff 1 1 1 1 1 1 1 1    1 1 1 1 1 1 1 1  ALM_MASK2 Alarm Mask 2 8.5.17
+0x10: 0xff, 0xff 1 1 1 1 1 1 1 1    1 1 1 1 1 1 1 1  ALM_MASK3 Alarm Mask 3 8.5.18
+0x11: 0xff, 0xff 1 1 1 1 1 1 1 1    1 1 1 1 1 1 1 1  ALM_MASK4 Alarm Mask 4 8.5.19
+0x12: 0x00, 0x02 _ _ _ _ _ _ _ _    _ _ _ _ _ _ 1 _  JESD_LN_SKEW JESD Lane Skew 8.5.20
+0x17: 0x00, 0x00 _ _ _ _ _ _ _ _    _ _ _ _ _ _ _ _  CMIX CMIX Configuration
+0x19: 0x00, 0x01 _ _ _ _ _ _ _ _    _ _ _ _ _ _ _ 1  OUTSUM Output Summation and Delay
+0x1c: 0x00, 0x00 _ _ _ _ _ _ _ _    _ _ _ _ _ _ _ _  PHASE_NCOAB Phase offset for AB path NCO 8.5.23
+0x1d: 0x00, 0x00 _ _ _ _ _ _ _ _    _ _ _ _ _ _ _ _  PHASE_NCOCD Phase offset for CD path NCO 8.5.24
+0x1e: 0x00, 0x00 _ _ _ _ _ _ _ _    _ _ _ _ _ _ _ _  0x1E-0x20 0x0000 FREQ_NCOAB Frequency for AB path NCO 8.5.25
+0x1f: 0x00, 0x00 _ _ _ _ _ _ _ _    _ _ _ _ _ _ _ _  FREQ_NCOAB Frequency
+0x20: 0x00, 0x00 _ _ _ _ _ _ _ _    _ _ _ _ _ _ _ _  FREQ_NCOAB Frequency
+0x21: 0x00, 0x00 _ _ _ _ _ _ _ _    _ _ _ _ _ _ _ _  0x21-0x23 0x0000 FREQ_NCOCD Frequency for CD path NCO 8.5.26
+0x22: 0x00, 0x00 _ _ _ _ _ _ _ _    _ _ _ _ _ _ _ _  FREQ_NCOCD Frequency
+0x23: 0xff, 0xff 1 1 1 1 1 1 1 1    1 1 1 1 1 1 1 1  FREQ_NCOCD Frequency
+0x24: 0x10, 0x31 _ _ _ 1 _ _ _ _    _ _ 1 1 _ _ _ 1  SYSREF_CLKDIV SYSREF Use for Clock Divider 8.5.27
+0x25: 0x32, 0x00 _ _ 1 1 _ _ 1 _    _ _ _ _ _ _ _ _  SERDES_CLK Serdes Clock Control 8.5.28
+0x27: 0x88, 0x88 1 _ _ _ 1 _ _ _    1 _ _ _ 1 _ _ _  SYNCSEL1 Sync Source Selection 8.5.29
+0x28: 0x03, 0x30 _ _ _ _ _ _ 1 1    _ _ 1 1 _ _ _ _  SYNCSEL2 Sync Source Selection 8.5.30
+0x29: 0x00, 0x00 _ _ _ _ _ _ _ _    _ _ _ _ _ _ _ _  PAP_GAIN_AB PAP path AB Gain Attenuation Step 8.5.31
+0x2a: 0x00, 0x00 _ _ _ _ _ _ _ _    _ _ _ _ _ _ _ _  PAP_WAIT_AB PAP path AB Wait Time at Gain = 0 8.5.32
+0x2b: 0x00, 0x00 _ _ _ _ _ _ _ _    _ _ _ _ _ _ _ _  PAP_GAIN_CD PAP path CD Gain Attenuation Step 8.5.33
+0x2c: 0x00, 0x00 _ _ _ _ _ _ _ _    _ _ _ _ _ _ _ _  PAP_WAIT_CD PAP path CD Wait Time at Gain = 0 8.5.34
+0x2d: 0x1f, 0xff _ _ _ 1 1 1 1 1    1 1 1 1 1 1 1 1  PAP_CFG_AB PAP path AB Configuration 8.5.35
+0x2e: 0x1f, 0xff _ _ _ 1 1 1 1 1    1 1 1 1 1 1 1 1  PAP_CFG_CD PAP path CD Configuration 8.5.36
+0x2f: 0x00, 0x00 _ _ _ _ _ _ _ _    _ _ _ _ _ _ _ _  SPIDAC_TEST1 Configuration for DAC SPI Constant 8.5.37
+0x30: 0x00, 0x00 _ _ _ _ _ _ _ _    _ _ _ _ _ _ _ _  SPIDAC_TEST2 DAC SPI Constant 8.5.38
+0x32: 0x07, 0x08 _ _ _ _ _ 1 1 1    _ _ _ _ 1 _ _ _  GAINAB Gain for path AB 8.5.39
+0x33: 0x2f, 0x3c _ _ 1 _ 1 1 1 1    _ _ 1 1 1 1 _ _  GAINCD Gain for path CD 8.5.40
+0x41: 0x00, 0x00 _ _ _ _ _ _ _ _    _ _ _ _ _ _ _ _  JESD_ERR_CNT JESD Error Counter
+0x46: 0x00, 0x44 _ _ _ _ _ _ _ _    _ 1 _ _ _ 1 _ _  JESD_ID1 JESD ID 1 8.5.42
+0x47: 0x19, 0x0a _ _ _ 1 1 _ _ 1    _ _ _ _ 1 _ 1 _  JESD_ID2 JESD ID 2 8.5.43
+0x48: 0x31, 0xc3 _ _ 1 1 _ _ _ 1    1 1 _ _ _ _ 1 1  JESD_ID3 JESD ID 3 and Subclass 8.5.44
+0x4a: 0x0f, 0x03 _ _ _ _ 1 1 1 1    _ _ _ _ _ _ 1 1  JESD_LN_EN JESD Lane Enable 8.5.45
+0x4b: 0x13, 0x00 _ _ _ 1 _ _ 1 1    _ _ _ _ _ _ _ _  JESD_RBD_F JESD RBD Buffer and Frame Octets 8.5.46
+0x4c: 0x13, 0x03 _ _ _ 1 _ _ 1 1    _ _ _ _ _ _ 1 1  JESD_K_L JESD K and L Parameters 8.5.47
+0x4d: 0x00, 0x01 _ _ _ _ _ _ _ _    _ _ _ _ _ _ _ 1  JESD_M_S JESD M and S Parameters 8.5.48
+0x4e: 0x0f, 0x4f _ _ _ _ 1 1 1 1    _ 1 _ _ 1 1 1 1  JESD_N_HD_SCR JESD N, HD and SCR Parameters 8.5.49
+0x4f: 0x1c, 0x60 _ _ _ 1 1 1 _ _    _ 1 1 _ _ _ _ _  JESD_MATCH JESD Character Match and Other 8.5.50
+0x50: 0x00, 0x00 _ _ _ _ _ _ _ _    _ _ _ _ _ _ _ _  JESD_LINK_CFG JESD Link Configuration Data 8.5.51
+0x51: 0x00, 0x1f _ _ _ _ _ _ _ _    _ _ _ 1 1 1 1 1  JESD_SYNC_REQ JESD Sync Request 8.5.52
+0x52: 0x00, 0xff _ _ _ _ _ _ _ _    1 1 1 1 1 1 1 1  JESD_ERR_OUT JESD Error Output 8.5.53
+0x53: 0x01, 0x00 _ _ _ _ _ _ _ 1    _ _ _ _ _ _ _ _  JESD_ILA_CFG1 JESD Configuration Value used for ILA
+0x54: 0x8e, 0x60 1 _ _ _ 1 1 1 _    _ 1 1 _ _ _ _ _  JESD_ILA_CFG2 JESD Configuration Value used for ILA
+0x5c: 0x00, 0x03 _ _ _ _ _ _ _ _    _ _ _ _ _ _ 1 1  JESD_SYSR_MODE JESD SYSREF Mode
+0x5f: 0x32, 0x10 _ _ 1 1 _ _ 1 _    _ _ _ 1 _ _ _ _  JESD_CROSSBAR1 JESD Crossbar Configuration 1 8.5.57
+0x60: 0x57, 0x64 _ 1 _ 1 _ 1 1 1    _ 1 1 _ _ 1 _ _  JESD_CROSSBAR2 JESD Crossbar Configuration 2 8.5.58
+0x64: 0x17, 0x0a _ _ _ 1 _ 1 1 1    _ _ _ _ 1 _ 1 _  JESD_ALM_L0 JESD Alarms for Lane 0 8.5.59
+0x65: 0x17, 0x0a _ _ _ 1 _ 1 1 1    _ _ _ _ 1 _ 1 _  JESD_ ALM_L1 JESD Alarms for Lane 1 8.5.60
+0x66: 0x07, 0x0a _ _ _ _ _ 1 1 1    _ _ _ _ 1 _ 1 _  JESD_ ALM_L2 JESD Alarms for Lane 2 8.5.61
+0x67: 0x17, 0x0a _ _ _ 1 _ 1 1 1    _ _ _ _ 1 _ 1 _  JESD_ALM_L3 JESD Alarms for Lane 3 8.5.62
+0x68: 0x05, 0x91 _ _ _ _ _ 1 _ 1    1 _ _ 1 _ _ _ 1  JESD_ALM_L4 JESD Alarms for Lane 4 8.5.63
+0x69: 0x00, 0x00 _ _ _ _ _ _ _ _    _ _ _ _ _ _ _ _  JESD_ALM_L5 JESD Alarms for Lane 5 8.5.64
+0x6a: 0x00, 0x00 _ _ _ _ _ _ _ _    _ _ _ _ _ _ _ _  JESD_ALM_L6 JESD Alarms for Lane 6 8.5.65
+0x6b: 0x00, 0x00 _ _ _ _ _ _ _ _    _ _ _ _ _ _ _ _  JESD_ALM_L7 JESD Alarms for Lane 7 8.5.66
+0x6c: 0x10, 0x00 _ _ _ 1 _ _ _ _    _ _ _ _ _ _ _ _  ALM_SYSREF_PAP SYSREF and PAP Alarms 8.5.67
+0x6d: 0x00, 0x00 _ _ _ _ _ _ _ _    _ _ _ _ _ _ _ _  ALM_CLKDIV1 Clock Divider Alarms 1 8.5.68
+0x0a: 0xfe, 0x13 1 1 1 1 1 1 1 _    _ _ _ 1 _ _ 1 1  CLK_CONFIG Clock Configuration 8.5.69
+0x0b: 0x00, 0x02 _ _ _ _ _ _ _ _    _ _ _ _ _ _ 1 _  SLEEP_CONFIG Sleep Configuration 8.5.70
+0x0c: 0xa4, 0x02 1 _ 1 _ _ 1 _ _    _ _ _ _ _ _ 1 _  CLK_OUT Divided Output Clock Configuration 8.5.71
+0x0d: 0xf0, 0x00 1 1 1 1 _ _ _ _    _ _ _ _ _ _ _ _  DACFS DAC Fullscale Current 8.5.72
+0x10: 0xff, 0xff 1 1 1 1 1 1 1 1    1 1 1 1 1 1 1 1  LCMGEN Internal sysref generator 8.5.73
+0x11: 0xff, 0xff 1 1 1 1 1 1 1 1    1 1 1 1 1 1 1 1  LCMGEN_DIV Counter for internal sysref generator 8.5.74
+0x12: 0x00, 0x02 _ _ _ _ _ _ _ _    _ _ _ _ _ _ 1 _  LCMGEN_SPISYSREF SPI SYSREF for internal sysref generator 8.5.75
+0x1b: 0x00, 0x00 _ _ _ _ _ _ _ _    _ _ _ _ _ _ _ _  DTEST Digital Test Signals
+0x23: 0xff, 0xff 1 1 1 1 1 1 1 1    1 1 1 1 1 1 1 1  SLEEP_CNTL Sleep Pin Control 8.5.77
+0x24: 0x10, 0x31 _ _ _ 1 _ _ _ _    _ _ 1 1 _ _ _ 1  SYSR_CAPTURE SYSREF Capture Circuit Control 8.5.78
+0x31: 0x04, 0x00 _ _ _ _ _ 1 _ _    _ _ _ _ _ _ _ _  CLK_PLL_CFG Clock Input and PLL Configuration 8.5.79
+0x32: 0x07, 0x08 _ _ _ _ _ 1 1 1    _ _ _ _ 1 _ _ _  PLL_CONFIG1 PLL Configuration 1 8.5.80
+0x33: 0x2f, 0x3c _ _ 1 _ 1 1 1 1    _ _ 1 1 1 1 _ _  PLL_CONFIG2 PLL Configuration 2 8.5.81
+0x34: 0x00, 0x00 _ _ _ _ _ _ _ _    _ _ _ _ _ _ _ _  LVDS_CONFIG LVDS Output Configuration 8.5.82
+0x35: 0x00, 0x18 _ _ _ _ _ _ _ _    _ _ _ 1 1 _ _ _  PLL_FDIV Fuse farm clock divider 8.5.83
+0x3b: 0x88, 0x02 1 _ _ _ 1 _ _ _    _ _ _ _ _ _ 1 _  SRDS_CLK_CFG Serdes Clock Configuration 8.5.84
+0x3c: 0x80, 0x29 1 _ _ _ _ _ _ _    _ _ 1 _ 1 _ _ 1  SRDS_PLL_CFG Serdes PLL Configuration 8.5.85
+0x3d: 0x00, 0x88 _ _ _ _ _ _ _ _    1 _ _ _ 1 _ _ _  SRDS_CFG1 Serdes Configuration 1 8.5.86
+0x3e: 0x09, 0x29 _ _ _ _ 1 _ _ 1    _ _ 1 _ 1 _ _ 1  SRDS_CFG2 Serdes Configuration 2 8.5.87
+0x3f: 0x00, 0x00 _ _ _ _ _ _ _ _    _ _ _ _ _ _ _ _  SRDS_POL Serdes Polarity Control 8.5.88
+0x76: 0x00, 0x00 _ _ _ _ _ _ _ _    _ _ _ _ _ _ _ _  SYNCBOUT JESD204B SYNCB Output

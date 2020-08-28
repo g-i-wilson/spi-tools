@@ -123,8 +123,10 @@ def printHex(aByteArray):
 
 
 def printReg(addrByte, twoByteArray):
-	print(hex(addrByte), end='')
-	print(": ", end='')
+	print(hex(addrByte), end=': ')
+	print(hex(twoByteArray[0]), end=', ')
+	print(hex(twoByteArray[1]), end=' ')
+	# print(": ", end='')
 	printByte(twoByteArray[0])
 	print("   ", end='')
 	printByte(twoByteArray[1])
@@ -140,7 +142,7 @@ spi = SpiController()
 spi.configure('ftdi:///2')
 
 # Get a port to a SPI slave w/ /CS on A*BUS3 and SPI mode 0 @ 12MHz
-slave = spi.get_port(cs=0, freq=1E3, mode=0)
+slave = spi.get_port(cs=0, freq=1E6, mode=0)
 
 # Request the JEDEC ID from the SPI slave
 # jedec_id = slave.exchange([0x9f], 3)
@@ -151,21 +153,23 @@ def formatBytes(bytes, orMasks):
     return newBytes
 
 
-def writeReg(regs, upperMask=0x00, lowerMask=0x00, cs_start=True, cs_stop=True):
+def writeReg(reg, upper=0x00, lower=0x00, cs_start=True, cs_stop=True):
     return slave.exchange( \
         out = [ \
-            regs[0], \
-            regs[1] | upperMask, \
-            regs[2] | lowerMask \
+            reg, \
+            upper, \
+            lower \
         ], \
         readlen=0, \
         start=cs_start, \
-        stop=cs_stop \
+        stop=cs_stop, \
+        duplex=False, \
+        droptail=0 \
     )
 
 def readReg(reg, cs_start=True, cs_stop=True):
     return slave.exchange( \
-        out=[ (reg[0] | 0x80) ], \
+        out=[ (reg | 0x80) ], \
         readlen=2, \
         start=cs_start, \
         stop=cs_stop, \
@@ -174,12 +178,26 @@ def readReg(reg, cs_start=True, cs_stop=True):
     )
 
 
+def bitOn(reg, upperBitMask, lowerBitMask):
+	currentState = readReg(reg)
+	writeReg(reg, currentState[0] | upperBitMask, currentState[1] | lowerBitMask)
+	return readReg(reg)
+
+def bitOff(reg, upperBitMask, lowerBitMask):
+	currentState = readReg(reg)
+	writeReg(reg, currentState[0] & ~upperBitMask, currentState[1] & ~lowerBitMask)
+	return readReg(reg)
+
+
 # writeReg( defaultMap[0], upperMask=0x80, lowerMask=0x00, start=True, stop=False )
 # writeReg( defaultMap[1], upperMask=0x00, lowerMask=0x08, start=True, stop=False )
 # printBytes( formatBytes([0x01, 0x18, 0x00],[0x80, 0x00, 0x00]) )
 # printHex( readReg( 0x81 ) )
+printReg( 0x03, bitOn( 0x03, 0x00, 0x04 ) )
+printReg( 0x03, bitOff( 0x03, 0x00, 0x04 ) )
+
 for aReg in defaultMap:
-	printReg( aReg[0], readReg( aReg, cs_start=True, cs_stop=True ) )
+	printReg( aReg[0], readReg( aReg[0], cs_start=True, cs_stop=True ) )
 # printHex( slave.exchange([0x81,0x18,0x80],readlen=2))
 
 # dacReg( [0x01, 0x18, 0x00], lowerMask=0x08, read=False, start=True, stop=False )

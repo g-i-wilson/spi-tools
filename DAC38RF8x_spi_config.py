@@ -189,20 +189,52 @@ def bitOff(reg, upperBitMask, lowerBitMask):
 	return readReg(reg)
 
 
-# writeReg( defaultMap[0], upperMask=0x80, lowerMask=0x00, start=True, stop=False )
-# writeReg( defaultMap[1], upperMask=0x00, lowerMask=0x08, start=True, stop=False )
-# printBytes( formatBytes([0x01, 0x18, 0x00],[0x80, 0x00, 0x00]) )
-# printHex( readReg( 0x81 ) )
-printReg( 0x03, bitOn( 0x03, 0x00, 0x04 ) )
-printReg( 0x03, bitOff( 0x03, 0x00, 0x04 ) )
+def readAll():
+	for aReg in defaultMap:
+		printReg( aReg[0], readReg( aReg[0] ) )
 
-for aReg in defaultMap:
-	printReg( aReg[0], readReg( aReg[0], cs_start=True, cs_stop=True ) )
-# printHex( slave.exchange([0x81,0x18,0x80],readlen=2))
 
-# dacReg( [0x01, 0x18, 0x00], lowerMask=0x08, read=False, start=True, stop=False )
-# print()
-# for aReg in defaultMap:
-#     printReg( dacReg( aReg, start=False, stop=False ) )
-# print()
-# dacReg( [0x01, 0x18, 0x00], start=False, stop=True )
+def enableAll():
+	# Enabled all register "pages" for reading/writing
+	writeReg( 0x09, 0x00, 0x07 )
+
+
+
+# 4-wire SPI mode
+writeReg( 0x01, 0x00, 0x80 )
+enableAll()
+readAll()
+
+
+ui = [""]
+
+while (ui[0] != "exit"):
+	ui = sys.stdin.readline().rstrip().split(' ')
+	
+	if (ui[0] == "readReg"):
+		printReg(int(ui[1],16), readReg(int(ui[1],16)))
+	if (ui[0] == "writeReg"):
+		writeReg(int(ui[1],16), int(ui[2],16), int(ui[3],16))
+		printReg(int(ui[1],16), readReg(int(ui[1],16)))
+	if (ui[0] == "bitOn"):
+		printReg(int(ui[1],16), bitOn(int(ui[1],16), int(ui[2],16), int(ui[3],16)))	
+	if (ui[0] == "bitOff"):
+		printReg(int(ui[1],16), bitOff(int(ui[1],16), int(ui[2],16), int(ui[3],16)))
+	if (ui[0] == "readAll"):
+		readAll()
+	if (ui[0] == "save"):
+		enableAll()
+		outputFile = open(ui[1], "w")
+		for aReg in defaultMap:
+			regData = readReg( aReg[0] )
+			outputFile.write(hex(aReg[0])+","+hex(regData[0])+","+hex(regData[1])+"\n")
+		outputFile.close()
+	if (ui[0] == "load"):
+		enableAll()
+		inputFile = open(ui[1], "r")
+		inputRegMap = inputFile.readlines()
+		for regData in inputRegMap:
+			reg = regData.rstrip().split(',')
+			writeReg(int(reg[0],16), int(reg[1],16), int(reg[2],16))
+		inputFile.close()
+		readAll()

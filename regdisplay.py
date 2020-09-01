@@ -1,0 +1,43 @@
+
+##########################################
+# Formatted printing of registers
+##########################################
+
+def printByte(aByte):
+    for aBit in range(8):
+        if ((aByte >> (7-aBit)) & 0x01):
+            print("1 ", end='')
+        else:
+            print("_ ", end='')
+
+def printHex(aByteArray):
+    for aByte in aByteArray:
+        print(hex(aByte))
+
+def printReg(addrName, addr=[], data=[], note="", nameColWidth=18):
+    print( addrName+(" "*(nameColWidth-len(addrName))), end=' ')
+    for a in addr:
+        print("0x{:02x}".format(a), end=' ')
+    print('  |  ', end='')
+    for d in data:
+        print("0x{:02x}".format(d), end=' ')
+        printByte(d)
+    print('  |  '+note)
+
+def printRead(func, reg):
+    readData = func(reg)
+    printReg( reg, data=readData )
+    return readData
+
+def printAction(func, reg, upper, lower):
+    readData = func(reg, upper, lower)
+    printReg( reg, data=readData )
+    return readData
+
+def printData(regData):
+    for name in regData:
+        if 'new_data' in regData[name]:
+            printReg(name, addr=regData[name]['addr'], data=regData[name]['data'], note=regData[name]['info'])
+            printReg("--> "+name, addr=regData[name]['addr'], data=regData[name]['new_data'], note=regData[name]['info'])
+        else:
+            printReg(name, addr=regData[name]['addr'], data=regData[name]['data'], note=regData[name]['info'])

@@ -1,5 +1,6 @@
 import DAC38RF8x
 from regdisplay import *
+import JSONFile
 
 ##########################################
 # Test DAC38RF8x module
@@ -22,6 +23,17 @@ from regdisplay import *
 
 dacSpi = DAC38RF8x.SpiConfig()
 
+jfile = JSONFile.new("DAC38RF8x.json")
+jfile.write(dacSpi.outDefData())
+
+print( "-----------------------------------\nDisplay all registers:" )
+printData( dacSpi.outRegData())
+
+print( "-----------------------------------\nLoad defaults:" )
+printData( dacSpi.inDataOutRegData(dacSpi.outDefData()) )
+
+
+# sequence data
 newSeq = {                          \
     'ALM_MASK1' : {                 \
         'mask' : [ 0x00, 0xFF ],    \
@@ -35,16 +47,18 @@ newSeq = {                          \
     'VENDOR_VER' : {}               \
 }
 
-
-newData = dacSpi.action(newSeq)
-printData(newData)
-
+print( "-----------------------------------\nLoad sequence:" )
+printData( dacSpi.inDataOutRegData(newSeq) )
 
 
+print( "-----------------------------------\nDisplay all registers:" )
+printData( dacSpi.outRegData())
 
-print( "-----------------------------------\nDUC 1:" )
-regData = dacSpi.readDataAll()
-printData(regData)
+
+
+# print( "-----------------------------------\nDUC 1:" )
+# regData = dacSpi.outRegData()
+# printData(regData)
 
 
 # dacSpi.setDUC(2)

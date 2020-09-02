@@ -1,6 +1,7 @@
 
 ##########################################
-# Formatted printing of registers
+# Format and print the contents of
+# a register (units of bytes).
 ##########################################
 
 def printByte(aByte):
@@ -10,10 +11,10 @@ def printByte(aByte):
         else:
             print("_ ", end='')
 
-def printHex(aByteArray):
-    for aByte in aByteArray:
-        print(hex(aByte))
-
+# def printHex(aByteArray):
+#     for aByte in aByteArray:
+#         print(hex(aByte))
+#
 def printReg(addrName, addr=[], data=[], note="", nameColWidth=18):
     print( addrName+(" "*(nameColWidth-len(addrName))), end=' ')
     for a in addr:
@@ -24,15 +25,41 @@ def printReg(addrName, addr=[], data=[], note="", nameColWidth=18):
         printByte(d)
     print('  |  '+note)
 
-def printRead(func, reg):
-    readData = func(reg)
-    printReg( reg, data=readData )
-    return readData
 
-def printAction(func, reg, upper, lower):
+
+##########################################
+# Wrapper functions to print the result of
+# functions that return a list of register
+# bytes.
+##########################################
+
+# def printRead(func, reg):
+#     readData = func(reg)
+#     printReg( reg, data=readData )
+#     return readData
+
+def printAction(func, reg, upper=0x00, lower=0x00):
     readData = func(reg, upper, lower)
     printReg( reg, data=readData )
     return readData
+
+
+##########################################
+# Print data structured as:
+#  {
+#     # read only operation
+#     'REG0' : {},
+#     # write-read operation
+#     'REG1' : {
+#         'data' : [ 0x08, 0x22 ]
+#     },
+#     # write-read operation with mask
+#     'REG2' : {
+#         'mask' : [ 0x0F, 0xFF ],
+#         'data' : [ 0x08, 0x22 ]
+#     }
+#  }
+##########################################
 
 def printData(regData):
     for name in regData:

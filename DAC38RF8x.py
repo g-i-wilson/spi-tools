@@ -1,6 +1,7 @@
 from pyftdi.spi import SpiController
 import time
 import sys
+import JSONFile
 
 
 class SpiConfig:
@@ -156,7 +157,7 @@ class SpiConfig:
                 addr, \
                 upper, \
                 lower \
-            ], ###################### why is this here???? \
+            ], \
             readlen=0, \
             start=True, \
             stop=True, \
@@ -168,7 +169,7 @@ class SpiConfig:
         addr = self.getAddress(name)
         readMask = 0x80
         data = self.slave.exchange( \
-            out=[ (addr | readMask) ], #################### why is the 0x00 here????? \
+            out=[ (addr | readMask) ], \
             readlen=2, \
             start=True, \
             stop=True, \
@@ -200,13 +201,6 @@ class SpiConfig:
         if addr:
             self.setPage(name)
             return self.writeReg(name, upper, lower)
-    def setDefault(self, name):
-        self.debugPrint( "setDefault -> " )
-        return self.writePageReg( \
-                    name, \
-                    self.getDefaultUpper(name), \
-                    self.getDefaultLower(name) \
-                )
     def readPageReg(self, name):
         self.debugPrint( "readPageReg -> " )
         self.enableReading()
@@ -231,16 +225,12 @@ class SpiConfig:
         currentState = self.readPageReg(name)
         self.debugPrint( "bitOff -> " )
         return self.writeReadPageReg(name, currentState[0] & ~upperBitMask, currentState[1] & ~lowerBitMask)
-    def writeDataDict(self, newData):
-        for name in newData.keys():
-            if name in self.defaultMap.keys():
-                self.writePageReg(name, newData[name]['data'][0], newData[name]['data'][0])
-    def readNames(self):
+    def outDefList(self):
         regNames = []
         for name in self.defaultMap.keys():
             regNames.append(name)
         return regNames
-    def readData(self, name):
+    def inNameOutRegData(self, name):
         regData = {}
         if name in self.defaultMap.keys():
             regData['data'] = self.readPageReg(name) # returns list
@@ -248,39 +238,54 @@ class SpiConfig:
             regData['page'] = [ self.getPage(name) ]
             regData['info'] = self.getInfo(name)
         return regData
-    def readDataList(self, regList):
+    def inNameOutDefData(self, name):
+        regData = {}
+        if name in self.defaultMap.keys():
+            regData['data'] = [ self.defaultMap[name][1], self.defaultMap[name][2] ]
+            regData['addr'] = [ self.defaultMap[name][0] ]
+            if self.multiDUC == 1:
+                regData['page'] = [ self.defaultMap[name][4] ]
+            else:
+                regData['page'] = [ self.defaultMap[name][5] ]
+            regData['info'] = self.defaultMap[name][3]
+        return regData
+    def inListOutFuncData(self, regList, func):
         regData = {}
         for name in regList:
             if name in self.defaultMap.keys():
-                regData[name] = self.readData(name)
+                regData[name] = func(name)
         return regData
-    def readDataAll(self):
-        return self.readDataList(self.readNames())
-    def readDataRange(self, start, stop):
+    def outRegData(self):
+        return self.inListOutFuncData(self.outDefList(), self.inNameOutRegData)
+    def outDefData(self):
+        return self.inListOutFuncData(self.outDefList(), self.inNameOutDefData)
+    def inRangeOutFuncData(self, start, stop, func):
         subList = []
         isPartOfList = False
-        for reg in self.readNames():
+        for reg in self.outDefList():
             if reg == start:
                 isPartOfList = True
             if reg == stop:
                 isPartOfList = False
             if isPartOfList:
                 subList.append(reg)
-        return self.readDataList(subList)
+        return self.inListOutFuncData(subList, func)
+    def inRangeOutRegData(self, start, stop):
+        return self.inRangeOutFuncData(start, stop, self.inNameOutRegData)
     def debugPrint(self, debugNote, end=''):
         if self.debugFlag:
             print(debugNote, end=end)
-    def action(self, seq):
-        result = {}
-        for reg in seq:
-            result[reg] = self.readData(reg)
-            if 'data' in seq[reg]: # data exists to write
-                if 'mask' in seq[reg]:
+    def inDataOutRegData(self, inputData):
+        outputData = {}
+        for reg in inputData:
+            outputData[reg] = self.inNameOutRegData(reg)
+            if 'data' in inputData[reg]: # data exists to write
+                if 'mask' in inputData[reg]:
                     self.writePageReg(reg, \
-                        (result[reg]['data'][0] & ~seq[reg]['mask'][0]) | seq[reg]['data'][0], \
-                        (result[reg]['data'][1] & ~seq[reg]['mask'][1]) | seq[reg]['data'][1] \
+                        (outputData[reg]['data'][0] & ~inputData[reg]['mask'][0]) | inputData[reg]['data'][0], \
+                        (outputData[reg]['data'][1] & ~inputData[reg]['mask'][1]) | inputData[reg]['data'][1] \
                     )
                 else:
-                    self.writePageReg(reg, seq[reg]['data'][0], seq[reg]['data'][1])
-                result[reg]['new_data'] = self.readPageReg(reg)
-        return result
+                    self.writePageReg(reg, inputData[reg]['data'][0], inputData[reg]['data'][1])
+                outputData[reg]['new_data'] = self.readPageReg(reg)
+        return outputData

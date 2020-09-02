@@ -2,6 +2,7 @@ import time
 import sys
 import DAC38RF8x
 from regdisplay import *
+import JSONFile
 
 ##########################################
 # SPI configuration class
@@ -49,57 +50,97 @@ class VCOTuner:
         print()
 
 
+def printStep(data):
+    printData(dacSpi.inDataOutRegData(data))
+
+def bitMaskToBytes(bitStr):
+    bit = 0x80
+    bitMask = 0x00
+    bitData = 0x00
+    for char in bitStr:
+        if char == 'X':
+            bitMask += bit
+        if char == '1':
+            bitData += bit
+        bit /= 2
+    return {'data':bitData, 'mask':bitMask}
+
+def bitData(name, upper, lower):
+    upperByte = bitMaskToBytes(upper)
+    lowerByte = bitMaskToBytes(lower)
+    return { \
+        name : { \
+            'data': [ upperByte['data'], lowerByte['data'] ], \
+            'mask': [ lowerByte['mask'], lowerByte['mask'] ]  \
+        } \
+    }
+
+
+def startupSequence():
+    ###############################
+    print (     "SPI_TXENABLE set to 0 (OR'd with TXENABLE pin)")
+    printStep({ \
+                'JESD_FIFO'     :{ 'data':[0x00,0x01] }  \
+    })
+    ###############################
+    while(1):
+        input(  "Depress RESETB push-button (press <ENTER>)")
+        VENDOR_VER = printRead(dacSpi.readPageReg, 'VENDOR_VER')
+        if (VENDOR_VER[0] & 0xFC == 0x80): # 0b100000XX
+            break
+    pllMode = input("Tune PLL? [y/N]\n> ")
+    if (pllMode.lower() == "y"):
+        t = VCOTuner(0x10, 0x40, 0x01)
+        t.tune()
+    ###############################
+    input(      "Start SYSREF generation... (press <ENTER>)")
+    ###############################
+    print(      "Encoder block in reset...")
+    printStep({ \
+        bitData('SYSREF_CLKDIV', 'XXXXXXXX', 'X000XXXX'), \
+        bitData('JESD_SYSR_MODE', 'XXXXXXXX', 'XXXXX000'), \
+        bitData('MULTIDUC_CFG1', '1XXXXXXX', 'XXXXXXXX') \
+    })
+    input(      "Ensure 2 SYSREF edges... (press <ENTER>)")
+    printStep({ \
+                'CLK_CONFIG'    :{ 'data':[0x00,0x00], 'mask':[0x80,0x00] } # 1XXXXXXX XXXXXXXX \
+    })
+    ###############################
+    print(      "JESD core in reset...")
+    printStep({
+                'RESET_CONFIG'  :{ 'data':[0x00,0x03], 'mask':[0x00,0x03] } # XXXXXXXX XXXXX111 \
+    })
+    ###############################
+    print(      "Synchronizing CDRV and JESD204B blocks...")
+    printStep({ \
+                'SYSREF_CLKDIV'    :{ 'data':[0x00,0x20], 'mask':[0x80,0x70] } # XXXXXXXX X010XXXX \
+    })
+    if input("Ensure 2 SYSREF edges... (press <ENTER>)\n> ") == "cancel":
+        return
+    printAction( writeReadReg, 0x5C, SYSREF_CLKDIV[0], (SYSREF_CLKDIV[1] & ~0x07) | 0x03 ) # XXXXX011
+    if input("Ensure 2 SYSREF edges... (press <ENTER>)\n> ") == "cancel":
+        return
+    print( "Taking JESD204B core out of reset...")
+    printAction( bitOff, 0x00, 0x00, 0x03 )
+    if input("Ensure 2 SYSREF edges... (press <ENTER>)\n> ") == "cancel":
+        return
+    print( "Clearing all DAC alarms...")
+    rangeAction( writeReadReg, 0x04, 0x05, 0x00, 0x00)
+    rangeAction( writeReadReg, 0x64, 0x6D, 0x00, 0x00)
+    if input("Stop SYSREF generation (optional)... (press <ENTER>)\n> ") == "cancel":
+        return
+    print( "SPI_TXENABLE set to 1 (OR'd with TXENABLE pin)...")
+    printAction( bitOn, 0x0D, 0x00, 0x01)
+    print( "Done." )
 
 
 
-# def startupSequence():
-    # print ("SPI_TXENABLE set to 0 (OR'd with TXENABLE pin)")
-    # # printAction( bitOn, 0x0D, 0x00, 0x01)
-    # printAction(dacSpi.action({'JESD_FIFO' : {'mask':0x01, 'data':0x01}})
-    # while(1):
-    #     if input("Depress RESETB push-button (press <ENTER>)\n> ") == "cancel":
-    #         return
-    #     VENDOR_VER = printRead(dacSpi.readPageReg, 'VENDOR_VER')
-    #     if (VENDOR_VER[0] & 0xFC == 0x80): # 0b100000XX
-    #         break
-    # pllMode = input("Tune PLL? [y/N]\n> ")
-    # if (pllMode.lower() == "y"):
-    #     t = VCOTuner(0x10, 0x40, 0x01)
-    #     t.tune()
-    # if input("Start SYSREF generation... (press <ENTER>)\n> ") == "cancel":
-    #     return
-    # print( "Encoder block in reset...")
-    # printAction( bitOff, 0x24, 0x00, 0x70)
-    # printAction( bitOff, 0x5C, 0x00, 0x07)
-    # printAction( bitOn, 0x0A, 0x80, 0x00)
-    # if input("Ensure 2 SYSREF edges... (press <ENTER>)\n> ") == "cancel":
-    #     return
-    # printAction( bitOff, 0x0A, 0x80, 0x00)
-    # print( "JESD core in reset...")
-    # printAction( bitOn, 0x00, 0x00, 0x03)
-    # print( "Synchronizing CDRV and JESD204B blocks...")
-    # SYSREF_CLKDIV = readReg(0x24)
-    # printAction( writeReadReg, 0x24, SYSREF_CLKDIV[0], (SYSREF_CLKDIV[1] & ~0x70) | 0x20 ) # X010XXXX
-    # if input("Ensure 2 SYSREF edges... (press <ENTER>)\n> ") == "cancel":
-    #     return
-    # printAction( writeReadReg, 0x5C, SYSREF_CLKDIV[0], (SYSREF_CLKDIV[1] & ~0x07) | 0x03 ) # XXXXX011
-    # if input("Ensure 2 SYSREF edges... (press <ENTER>)\n> ") == "cancel":
-    #     return
-    # print( "Taking JESD204B core out of reset...")
-    # printAction( bitOff, 0x00, 0x00, 0x03 )
-    # if input("Ensure 2 SYSREF edges... (press <ENTER>)\n> ") == "cancel":
-    #     return
-    # print( "Clearing all DAC alarms...")
-    # rangeAction( writeReadReg, 0x04, 0x05, 0x00, 0x00)
-    # rangeAction( writeReadReg, 0x64, 0x6D, 0x00, 0x00)
-    # if input("Stop SYSREF generation (optional)... (press <ENTER>)\n> ") == "cancel":
-    #     return
-    # print( "SPI_TXENABLE set to 1 (OR'd with TXENABLE pin)...")
-    # printAction( bitOn, 0x0D, 0x00, 0x01)
-    # print( "Done." )
 
 
+def ui_hex(str):
+    return int(str,16)
 
+dacJSON = None
 
 print("**** DAC38RF8x SPI Register Config ****")
 print()
@@ -123,53 +164,45 @@ ui = [""]
 while (ui[0] != "exit"):
     print("\n> ", end='')
     ui = sys.stdin.readline().rstrip().split(' ')
-    command = ui[0]
-    register = ""
-    uiVal = [0,0,0]
-    if len(ui)>1:
-        register = ui[1]
-    for i in range(1, len(ui)):
-        uiVal[i-1] = int(ui[i],16)
 
-    if (command == "duc"):
-        dacSpi.setDUC(uiVal[0])
-    if (command == "read"):
-        printRead( dacSpi.readPageReg, register )
-    if (command == "write"):
-        printAction( dacSpi.writeReadPageReg, register, uiVal[1], uiVal[2] )
-    if (command == "on"):
-        printAction( dacSpi.bitsOn, register, uiVal[1], uiVal[2] )
-    if (command == "off"):
-        printAction( dacSpi.bitsOff, register, uiVal[1], uiVal[2] )
-    if (command == "readAll"):
-        printData(dacSpi.readDataAll())
-    if (command == "save"):
-        outputFile = open(ui[1], "w")
-        allData = dacSpi.readDataAll()
-        for reg in allData:
-            outputFile.write(reg+","+hex(allData[reg]['data'][0])+","+hex(allData[reg]['data'][1])+"\n")
-        outputFile.close()
-    if (command == "load"):
-        inputFile = open(ui[1], "r")
-        inputRegMap = inputFile.readlines()
-        for regData in inputRegMap:
-            reg = regData.rstrip().split(',')
-            dacSpi.writePageReg(reg[0], int(reg[1],16), int(reg[2],16))
-        inputFile.close()
-        printData(dacSpi.readDataAll())
-    # if (command == "loadDefault"):
-    #     # for aReg in defaultMap:
-    #     #     writeReg(aReg[0], aReg[1], aReg[2])
-    #     # enableAll()
-    #     # readAll()
-    # if (command == "enableAll"):
-    #     # enableAll()
-    #     # readAll()
-    # if (command == "spiReset"):
-    #     # spiReset()
-    # if (command == "enable4Wire"):
-    #     # enable4Wire()
-    # if (command == "zeroRange"):
+    if (ui[0] == "duc"):
+        dacSpi.setDUC(int(ui[1],16))
+    if (ui[0] == "read"):
+        printRead( dacSpi.readPageReg, ui[1] )
+    if (ui[0] == "write"):
+        writeData = { ui[1] : { 'data':[ int(ui[2],16), int(ui[3],16) ] } }
+        printData( dacSpi.inDataOutRegData(writeData) )
+        # printAction( dacSpi.writeReadPageReg, ui[1], int(ui[2],16), int(ui[3],16) )
+    if (ui[0] == "writeBits"):
+        writeData = { ui[1] : { 'data':[ int(ui[2],16), int(ui[3],16) ], 'mask':[ int(ui[4],16), int(ui[5],16) ] } }
+        printData( dacSpi.inDataOutRegData(writeData) )
+        # printAction( dacSpi.writeReadPageReg, ui[1], int(ui[2],16), int(ui[3],16) )
+    if (ui[0] == "on"):
+        printAction( dacSpi.bitsOn, ui[1], int(ui[2],16), int(ui[3],16) )
+    if (ui[0] == "off"):
+        printAction( dacSpi.bitsOff, ui[1], int(ui[2],16), int(ui[3],16) )
+    if (ui[0] == "readAll"):
+        printData( dacSpi.outRegData() )
+    if (ui[0] == "save"):
+        if dacJSON is None:
+            if len(ui) > 1:
+                dacJSON = JSONFile.new(ui[1])
+            else:
+                dacJSON = JSONFile.new(input("\nSave as: "))
+        dacData = dacSpi.outRegData()
+        dacJSON.write( dacData )
+        printData( dacSpi.outRegData() )
+    if (ui[0] == "load"):
+        if dacJSON is None:
+            dacJSON = JSONFile.load(ui[1])
+        dacSpi.inDataOutRegData(dacJSON.read())
+        printData( dacSpi.outRegData() )
+    if (ui[0] == "loadDefault"):
+        dacSpi.inDataOutRegData(dacSpi.outDefData())
+        printData( dacSpi.outRegData() )
+    # if (ui[0] == "spiReset"):
+        # spiReset()
+    # if (ui[0] == "zeroRange"):
     #     # rangeWrite(writeReadReg, uiVal[0], uiVal[1], 0x00, 0x00)
-    if (command == "startup"):
+    if (ui[0] == "startup"):
         startupSequence()

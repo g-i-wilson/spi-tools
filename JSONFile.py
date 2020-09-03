@@ -14,7 +14,7 @@ def load(filePath):
     return obj
 
 
-def mergeOldIntoNew(new, old):
+def mergeOldIntoNew(new={}, old={}):
     if debug:
         print(new)
         print(old)
@@ -54,7 +54,7 @@ class JSONFile:
             self.data = data
         try:
             file = open(self.filePath, "w")
-            json.dump(self.data, file, indent=4, separators=(',', ': '))
+            json.dump(self.data, file)
             ret = self.data
         except:
             if debug:
@@ -72,7 +72,7 @@ class JSONFile:
             return None
     def merge(self, data):
         print(data)
-        mergeOldIntoNew(data, self.data)
+        mergeOldIntoNew(new=data, old=self.data)
         return self.write(data)
     def mergeStr(self, jsonStr):
         try:

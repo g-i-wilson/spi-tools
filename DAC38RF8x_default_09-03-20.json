@@ -1,0 +1,653 @@
+{
+  "RESET_CONFIG": {
+		"data": [88, 3],
+		"addr": [0],
+		"info": "Chip Reset and Configuration 8.5.1",
+		"pre_w": [{"PAGE_SET": [0, 0]}],
+		"pre_r": [{"PAGE_SET": [0, 0]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "IO_CONFIG": {
+		"data": [24, 128],
+		"addr": [1],
+		"info": "IO Configuration 8.5.2",
+		"pre_w": [{"PAGE_SET": [0, 0]}],
+		"pre_r": [{"PAGE_SET": [0, 0]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "ALM_SD_MASK": {
+		"data": [255, 255],
+		"addr": [2],
+		"info": "Lane Signal Detect Alarm Mask 8.5.3",
+		"pre_w": [{"PAGE_SET": [0, 0]}],
+		"pre_r": [{"PAGE_SET": [0, 0]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "ALM_CLK_MASK": {
+		"data": [255, 255],
+		"addr": [3],
+		"info": "Clock Alarms Mask 8.5.4",
+		"pre_w": [{"PAGE_SET": [0, 0]}],
+		"pre_r": [{"PAGE_SET": [0, 0]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "ALM_SD_DET": {
+		"data": [0, 0],
+		"addr": [4],
+		"info": "SERDES Loss of Signal Detection Alarms 8.5.5",
+		"pre_w": [{"PAGE_SET": [0, 0]}],
+		"pre_r": [{"PAGE_SET": [0, 0]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "ALM_SYSREF_DET": {
+		"data": [0, 0],
+		"addr": [5],
+		"info": "SYSREF Alignment Circuit Alarms 8.5.6",
+		"pre_w": [{"PAGE_SET": [0, 0]}],
+		"pre_r": [{"PAGE_SET": [0, 0]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "TEMP_PLLVOLT": {
+		"data": [0, 0],
+		"addr": [6],
+		"info": " Temperature Sensor and PLL Loop Voltage 8.5.7",
+		"pre_w": [{"PAGE_SET": [0, 0]}],
+		"pre_r": [{"PAGE_SET": [0, 0]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "PAGE_SET": {
+		"data": [0, 0],
+		"addr": [9],
+		"info": "Page Set ",
+		"pre_w": [{"PAGE_SET": [0, 0]}],
+		"pre_r": [{"PAGE_SET": [0, 0]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "SYSREF_ALIGN_R": {
+		"data": [0, 0],
+		"addr": [120],
+		"info": "SYSERF Align to r1 and r3 Count 8.5.9",
+		"pre_w": [{"PAGE_SET": [0, 0]}],
+		"pre_r": [{"PAGE_SET": [0, 0]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "SYSREF12_CNT": {
+		"data": [0, 0],
+		"addr": [121],
+		"info": "SYSREF Phase Count 1 and 2 8.5.10",
+		"pre_w": [{"PAGE_SET": [0, 0]}],
+		"pre_r": [{"PAGE_SET": [0, 0]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "SYSREF34_CNT": {
+		"data": [0, 0],
+		"addr": [122],
+		"info": "SYSREF Phase Count 3 and 4",
+		"pre_w": [{"PAGE_SET": [0, 0]}],
+		"pre_r": [{"PAGE_SET": [0, 0]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "VENDOR_VER": {
+		"data": [0, 9],
+		"addr": [127],
+		"info": "Vendor ID and Chip Version",
+		"pre_w": [{"PAGE_SET": [0, 0]}],
+		"pre_r": [{"PAGE_SET": [0, 0]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "MULTIDUC_CFG1": {
+		"data": [2, 176],
+		"addr": [10],
+		"info": "Multi-DUC Configuration (PAP, Interpolation) ",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "MULTIDUC_CFG2": {
+		"data": [36, 2],
+		"addr": [12],
+		"info": "Multi-DUC Configuration (Mixers) 8.5.14",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "JESD_FIFO": {
+		"data": [128, 0],
+		"addr": [13],
+		"info": "JESD FIFO Control 8.5.15",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "ALM_MASK1": {
+		"data": [0, 255],
+		"addr": [14],
+		"info": "Alarm Mask 1 8.5.16",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "ALM_MASK2": {
+		"data": [255, 255],
+		"addr": [15],
+		"info": "Alarm Mask 2 8.5.17",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "ALM_MASK3": {
+		"data": [255, 255],
+		"addr": [16],
+		"info": "Alarm Mask 3 8.5.18",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "ALM_MASK4": {
+		"data": [255, 255],
+		"addr": [17],
+		"info": "Alarm Mask 4 8.5.19",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "JESD_LN_SKEW": {
+		"data": [0, 0],
+		"addr": [18],
+		"info": "JESD Lane Skew 8.5.20",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "CMIX": {
+		"data": [0, 0],
+		"addr": [23],
+		"info": "CMIX Configuration",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "OUTSUM": {
+		"data": [0, 0],
+		"addr": [25],
+		"info": "Output Summation and Delay",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "PHASE_NCOAB": {
+		"data": [0, 0],
+		"addr": [28],
+		"info": "Phase offset for AB path NCO 8.5.23",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "PHASE_NCOCD": {
+		"data": [0, 0],
+		"addr": [29],
+		"info": "Phase offset for CD path NCO 8.5.24",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "FREQ_NCOAB1": {
+		"data": [0, 0],
+		"addr": [30],
+		"info": "0x1E-0x20 0x0000 FREQ_NCOAB Frequency for AB path NCO 8.5.25",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "FREQ_NCOAB2": {
+		"data": [0, 0],
+		"addr": [31],
+		"info": "FREQ_NCOAB",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "FREQ_NCOAB3": {
+		"data": [0, 0],
+		"addr": [32],
+		"info": "FREQ_NCOAB",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "FREQ_NCOCD1": {
+		"data": [0, 0],
+		"addr": [33],
+		"info": "0x21-0x23 0x0000 FREQ_NCOCD Frequency for CD path NCO 8.5.26",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "FREQ_NCOCD2": {
+		"data": [0, 0],
+		"addr": [34],
+		"info": "FREQ_NCOCD",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "FREQ_NCOCD3": {
+		"data": [0, 0],
+		"addr": [35],
+		"info": "FREQ_NCOCD",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "SYSREF_CLKDIV": {
+		"data": [0, 16],
+		"addr": [36],
+		"info": "SYSREF Use for Clock Divider 8.5.27",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "SERDES_CLK": {
+		"data": [119, 0],
+		"addr": [37],
+		"info": "Serdes Clock Control 8.5.28",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "SYNCSEL1": {
+		"data": [17, 68],
+		"addr": [39],
+		"info": "Sync Source Selection 8.5.29",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "SYNCSEL2": {
+		"data": [0, 0],
+		"addr": [40],
+		"info": "Sync Source Selection 8.5.30",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "PAP_GAIN_AB": {
+		"data": [0, 0],
+		"addr": [41],
+		"info": "PAP path AB Gain Attenuation Step 8.5.31",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "PAP_WAIT_AB": {
+		"data": [0, 0],
+		"addr": [42],
+		"info": "PAP path AB Wait Time at Gain = 0 8.5.32",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "PAP_GAIN_CD": {
+		"data": [0, 0],
+		"addr": [43],
+		"info": "PAP path CD Gain Attenuation Step 8.5.33",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "PAP_WAIT_CD": {
+		"data": [0, 0],
+		"addr": [44],
+		"info": "PAP path CD Wait Time at Gain = 0 8.5.34",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "PAP_CFG_AB": {
+		"data": [31, 255],
+		"addr": [45],
+		"info": "PAP path AB Configuration 8.5.35",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "PAP_CFG_CD": {
+		"data": [31, 255],
+		"addr": [46],
+		"info": "PAP path CD Configuration 8.5.36",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "SPIDAC_TEST1": {
+		"data": [0, 0],
+		"addr": [47],
+		"info": "Configuration for DAC SPI Constant 8.5.37",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "SPIDAC_TEST2": {
+		"data": [0, 0],
+		"addr": [48],
+		"info": "DAC SPI Constant 8.5.38",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "GAINAB": {
+		"data": [4, 0],
+		"addr": [50],
+		"info": "Gain for path AB 8.5.39",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "GAINCD": {
+		"data": [4, 0],
+		"addr": [51],
+		"info": "Gain for path CD 8.5.40",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "JESD_ERR_CNT": {
+		"data": [0, 0],
+		"addr": [65],
+		"info": "JESD Error Counter",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "JESD_ID1": {
+		"data": [0, 68],
+		"addr": [70],
+		"info": "JESD ID 1 8.5.42",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "JESD_ID2": {
+		"data": [25, 10],
+		"addr": [71],
+		"info": "JESD ID 2 8.5.43",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "JESD_ID3": {
+		"data": [49, 195],
+		"addr": [72],
+		"info": "JESD ID 3 and Subclass 8.5.44",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "JESD_LN_EN": {
+		"data": [0, 3],
+		"addr": [74],
+		"info": "JESD Lane Enable 8.5.45",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "JESD_RBD_F": {
+		"data": [19, 0],
+		"addr": [75],
+		"info": "JESD RBD Buffer and Frame Octets 8.5.46",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "JESD_K_L": {
+		"data": [19, 3],
+		"addr": [76],
+		"info": "JESD K and L Parameters 8.5.47",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "JESD_M_S": {
+		"data": [1, 0],
+		"addr": [77],
+		"info": "JESD M and S Parameters 8.5.48",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "JESD_N_HD_SCR": {
+		"data": [15, 79],
+		"addr": [78],
+		"info": "JESD N, HD and SCR Parameters 8.5.49",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "JESD_MATCH": {
+		"data": [28, 193],
+		"addr": [79],
+		"info": "JESD Character Match and Other 8.5.50",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "JESD_LINK_CFG": {
+		"data": [0, 0],
+		"addr": [80],
+		"info": "JESD Link Configuration Data 8.5.51",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "JESD_SYNC_REQ": {
+		"data": [0, 255],
+		"addr": [81],
+		"info": "JESD Sync Request 8.5.52",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "JESD_ERR_OUT": {
+		"data": [0, 255],
+		"addr": [82],
+		"info": "JESD Error Output 8.5.53",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "JESD_ILA_CFG1": {
+		"data": [1, 0],
+		"addr": [83],
+		"info": "JESD Configuration Value used for ILA",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "JESD_ILA_CFG2": {
+		"data": [142, 96],
+		"addr": [84],
+		"info": "JESD Configuration Value used for ILA",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "JESD_SYSR_MODE": {
+		"data": [0, 1],
+		"addr": [92],
+		"info": "JESD SYSREF Mode",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "JESD_CROSSBAR1": {
+		"data": [1, 35],
+		"addr": [95],
+		"info": "JESD Crossbar Configuration 1 8.5.57",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "JESD_CROSSBAR2": {
+		"data": [69, 103],
+		"addr": [96],
+		"info": "JESD Crossbar Configuration 2 8.5.58",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "JESD_ALM_L0": {
+		"data": [0, 0],
+		"addr": [100],
+		"info": "JESD Alarms for Lane 0 8.5.59",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "JESD_ALM_L1": {
+		"data": [0, 0],
+		"addr": [101],
+		"info": "JESD Alarms for Lane 1 8.5.60",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "JESD_ALM_L2": {
+		"data": [0, 0],
+		"addr": [102],
+		"info": "JESD Alarms for Lane 2 8.5.61",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "JESD_ALM_L7": {
+		"data": [0, 0],
+		"addr": [107],
+		"info": "JESD Alarms for Lane 7 8.5.66",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "JESD_ALM_L3": {
+		"data": [0, 0],
+		"addr": [103],
+		"info": "JESD Alarms for Lane 3 8.5.62",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "JESD_ALM_L4": {
+		"data": [0, 0],
+		"addr": [104],
+		"info": "JESD Alarms for Lane 4 8.5.63",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "JESD_ALM_L5": {
+		"data": [0, 0],
+		"addr": [105],
+		"info": "JESD Alarms for Lane 5 8.5.64",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "JESD_ALM_L6": {
+		"data": [0, 0],
+		"addr": [106],
+		"info": "JESD Alarms for Lane 6 8.5.65",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "ALM_SYSREF_PAP": {
+		"data": [0, 0],
+		"addr": [108],
+		"info": "SYSREF and PAP Alarms 8.5.67",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "ALM_CLKDIV1": {
+		"data": [0, 0],
+		"addr": [109],
+		"info": "Clock Divider Alarms 1 8.5.68",
+		"pre_w": [{"PAGE_SET": [0, 1]}],
+		"pre_r": [{"PAGE_SET": [0, 1]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "CLK_CONFIG": {
+		"data": [252, 3],
+		"addr": [10],
+		"info": "Clock Configuration 8.5.69",
+		"pre_w": [{"PAGE_SET": [0, 4]}],
+		"pre_r": [{"PAGE_SET": [0, 4]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "SLEEP_CONFIG": {
+		"data": [0, 34],
+		"addr": [11],
+		"info": "Sleep Configuration 8.5.70",
+		"pre_w": [{"PAGE_SET": [0, 4]}],
+		"pre_r": [{"PAGE_SET": [0, 4]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "CLK_OUT": {
+		"data": [160, 2],
+		"addr": [12],
+		"info": "Divided Output Clock Configuration 8.5.71",
+		"pre_w": [{"PAGE_SET": [0, 4]}],
+		"pre_r": [{"PAGE_SET": [0, 4]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "DACFS": {
+		"data": [240, 0],
+		"addr": [13],
+		"info": "DAC Fullscale Current 8.5.72",
+		"pre_w": [{"PAGE_SET": [0, 4]}],
+		"pre_r": [{"PAGE_SET": [0, 4]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "LCMGEN": {
+		"data": [0, 0],
+		"addr": [16],
+		"info": "Internal sysref generator 8.5.73",
+		"pre_w": [{"PAGE_SET": [0, 4]}],
+		"pre_r": [{"PAGE_SET": [0, 4]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "LCMGEN_DIV": {
+		"data": [0, 0],
+		"addr": [17],
+		"info": "Counter for internal sysref generator 8.5.74",
+		"pre_w": [{"PAGE_SET": [0, 4]}],
+		"pre_r": [{"PAGE_SET": [0, 4]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "LCMGEN_SPISYSREF": {
+		"data": [0, 0],
+		"addr": [18],
+		"info": "SPI SYSREF for internal sysref generator 8.5.75",
+		"pre_w": [{"PAGE_SET": [0, 4]}],
+		"pre_r": [{"PAGE_SET": [0, 4]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "DTEST": {
+		"data": [0, 0],
+		"addr": [27],
+		"info": "Digital Test Signals",
+		"pre_w": [{"PAGE_SET": [0, 4]}],
+		"pre_r": [{"PAGE_SET": [0, 4]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "SLEEP_CNTL": {
+		"data": [255, 255],
+		"addr": [35],
+		"info": "Sleep Pin Control 8.5.77",
+		"pre_w": [{"PAGE_SET": [0, 4]}],
+		"pre_r": [{"PAGE_SET": [0, 4]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "SYSR_CAPTURE": {
+		"data": [16, 0],
+		"addr": [36],
+		"info": "SYSREF Capture Circuit Control 8.5.78",
+		"pre_w": [{"PAGE_SET": [0, 4]}],
+		"pre_r": [{"PAGE_SET": [0, 4]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "CLK_PLL_CFG": {
+		"data": [2, 0],
+		"addr": [49],
+		"info": "Clock Input and PLL Configuration 8.5.79",
+		"pre_w": [{"PAGE_SET": [0, 4]}],
+		"pre_r": [{"PAGE_SET": [0, 4]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "PLL_CONFIG1": {
+		"data": [3, 8],
+		"addr": [50],
+		"info": "PLL Configuration 1 8.5.80",
+		"pre_w": [{"PAGE_SET": [0, 4]}],
+		"pre_r": [{"PAGE_SET": [0, 4]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "PLL_CONFIG2": {
+		"data": [64, 24],
+		"addr": [51],
+		"info": "PLL Configuration 2 8.5.81",
+		"pre_w": [{"PAGE_SET": [0, 4]}],
+		"pre_r": [{"PAGE_SET": [0, 4]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "LVDS_CONFIG": {
+		"data": [0, 0],
+		"addr": [52],
+		"info": "LVDS Output Configuration 8.5.82",
+		"pre_w": [{"PAGE_SET": [0, 4]}],
+		"pre_r": [{"PAGE_SET": [0, 4]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "PLL_FDIV": {
+		"data": [0, 24],
+		"addr": [53],
+		"info": "Fuse farm clock divider 8.5.83",
+		"pre_w": [{"PAGE_SET": [0, 4]}],
+		"pre_r": [{"PAGE_SET": [0, 4]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "SRDS_CLK_CFG": {
+		"data": [24, 2],
+		"addr": [59],
+		"info": "Serdes Clock Configuration 8.5.84",
+		"pre_w": [{"PAGE_SET": [0, 4]}],
+		"pre_r": [{"PAGE_SET": [0, 4]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "SRDS_PLL_CFG": {
+		"data": [130, 40],
+		"addr": [60],
+		"info": "Serdes PLL Configuration 8.5.85",
+		"pre_w": [{"PAGE_SET": [0, 4]}],
+		"pre_r": [{"PAGE_SET": [0, 4]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "SRDS_CFG1": {
+		"data": [0, 136],
+		"addr": [61],
+		"info": "Serdes Configuration 1 8.5.86",
+		"pre_w": [{"PAGE_SET": [0, 4]}],
+		"pre_r": [{"PAGE_SET": [0, 4]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "SRDS_CFG2": {
+		"data": [9, 9],
+		"addr": [62],
+		"info": "Serdes Configuration 2 8.5.87",
+		"pre_w": [{"PAGE_SET": [0, 4]}],
+		"pre_r": [{"PAGE_SET": [0, 4]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "SRDS_POL": {
+		"data": [0, 0],
+		"addr": [63],
+		"info": "Serdes Polarity Control 8.5.88",
+		"pre_w": [{"PAGE_SET": [0, 4]}],
+		"pre_r": [{"PAGE_SET": [0, 4]}, {"IO_CONFIG": [24, 128]}]
+		},
+  "SYNCBOUT": {
+		"data": [0, 0],
+		"addr": [118],
+		"info": "JESD204B SYNCB Output",
+		"pre_w": [{"PAGE_SET": [0, 4]}],
+		"pre_r": [{"PAGE_SET": [0, 4]}, {"IO_CONFIG": [24, 128]}]
+    }
+}

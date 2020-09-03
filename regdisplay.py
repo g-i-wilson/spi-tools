@@ -64,7 +64,7 @@ def printAction(func, reg, upper=0x00, lower=0x00):
 def printData(regData):
     for name in regData:
         if 'new_data' in regData[name]:
-            printReg(name, addr=regData[name]['addr'], data=regData[name]['data'], note=regData[name]['info'])
-            printReg("--> "+name, addr=regData[name]['addr'], data=regData[name]['new_data'], note=regData[name]['info'])
+            printReg(name, addr=regData[name]['addr_w'], data=regData[name]['data'], note=regData[name]['info'])
+            printReg("--> "+name, addr=regData[name]['addr_w'], data=regData[name]['new_data'], note=regData[name]['info'])
         else:
-            printReg(name, addr=regData[name]['addr'], data=regData[name]['data'], note=regData[name]['info'])
+            printReg(name, addr=regData[name]['addr_w'], data=regData[name]['data'], note=regData[name]['info'])

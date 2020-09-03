@@ -197,10 +197,8 @@ class SpiConfig:
         self.writeReg("PAGE_SET", 0x00, page)
     def writePageReg(self, name, upper=0x00, lower=0x00):
         self.debugPrint( "writePageReg -> " )
-        addr = self.getAddress(name)
-        if addr:
-            self.setPage(name)
-            return self.writeReg(name, upper, lower)
+        self.setPage(name)
+        return self.writeReg(name, upper, lower)
     def readPageReg(self, name):
         self.debugPrint( "readPageReg -> " )
         self.enableReading()
@@ -234,20 +232,21 @@ class SpiConfig:
         regData = {}
         if name in self.defaultMap.keys():
             regData['data'] = self.readPageReg(name) # returns list
-            regData['addr'] = [ self.getAddress(name) ]
-            regData['page'] = [ self.getPage(name) ]
+            regData['addr_w'] = [ self.getAddress(name) ]
+            regData['addr_r'] = [ self.getAddress(name) | 0x80 ]
             regData['info'] = self.getInfo(name)
+            regData['pre_w'] = [ {"PAGE_SET": [0x00, self.getPage(name)]} ]
+            regData['pre_r'] = [ {"PAGE_SET": [0x00, self.getPage(name)]}, {"IO_CONFIG": [0x18, 0x80]} ]
         return regData
     def inNameOutDefData(self, name):
         regData = {}
         if name in self.defaultMap.keys():
             regData['data'] = [ self.defaultMap[name][1], self.defaultMap[name][2] ]
-            regData['addr'] = [ self.defaultMap[name][0] ]
-            if self.multiDUC == 1:
-                regData['page'] = [ self.defaultMap[name][4] ]
-            else:
-                regData['page'] = [ self.defaultMap[name][5] ]
+            regData['addr_w'] = [ self.defaultMap[name][0] ]
+            regData['addr_r'] = [ self.defaultMap[name][0] | 0x80 ]
             regData['info'] = self.defaultMap[name][3]
+            regData['pre_w'] = [ {"PAGE_SET": [0x00, self.getPage(name)]} ]
+            regData['pre_r'] = [ {"PAGE_SET": [0x00, self.getPage(name)]}, {"IO_CONFIG": [0x18, 0x80]} ]
         return regData
     def inListOutFuncData(self, regList, func):
         regData = {}

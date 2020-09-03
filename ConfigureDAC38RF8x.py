@@ -58,7 +58,7 @@ def bitMaskToBytes(bitStr):
     bitMask = 0x00
     bitData = 0x00
     for char in bitStr:
-        if char == 'X':
+        if char == '1' or char == '0':
             bitMask += bit
         if char == '1':
             bitData += bit
@@ -80,7 +80,7 @@ def startupSequence():
     ###############################
     print (     "SPI_TXENABLE set to 0 (OR'd with TXENABLE pin)")
     printStep({ \
-                'JESD_FIFO'     :{ 'data':[0x00,0x01] }  \
+        bitData('JESD_FIFO',        'XXXXXXXX', 'XXXXXXX1') \
     })
     ###############################
     while(1):
@@ -97,37 +97,38 @@ def startupSequence():
     ###############################
     print(      "Encoder block in reset...")
     printStep({ \
-        bitData('SYSREF_CLKDIV', 'XXXXXXXX', 'X000XXXX'), \
-        bitData('JESD_SYSR_MODE', 'XXXXXXXX', 'XXXXX000'), \
-        bitData('MULTIDUC_CFG1', '1XXXXXXX', 'XXXXXXXX') \
+        bitData('SYSREF_CLKDIV',    'XXXXXXXX', 'X000XXXX'), \
+        bitData('JESD_SYSR_MODE',   'XXXXXXXX', 'XXXXX000'), \
+        bitData('MULTIDUC_CFG1',    '1XXXXXXX', 'XXXXXXXX') \
     })
     input(      "Ensure 2 SYSREF edges... (press <ENTER>)")
     printStep({ \
-                'CLK_CONFIG'    :{ 'data':[0x00,0x00], 'mask':[0x80,0x00] } # 1XXXXXXX XXXXXXXX \
+        bitData('CLK_CONFIG',       '1XXXXXXX', 'XXXXXXXX') \
     })
     ###############################
     print(      "JESD core in reset...")
     printStep({
-                'RESET_CONFIG'  :{ 'data':[0x00,0x03], 'mask':[0x00,0x03] } # XXXXXXXX XXXXX111 \
+        bitData('RESET_CONFIG',     'XXXXXXXX', 'XXXXX111') \
     })
     ###############################
     print(      "Synchronizing CDRV and JESD204B blocks...")
     printStep({ \
-                'SYSREF_CLKDIV'    :{ 'data':[0x00,0x20], 'mask':[0x80,0x70] } # XXXXXXXX X010XXXX \
+        bitData('SYSREF_CLKDIV'     'XXXXXXXX', 'X010XXXX') \
     })
-    if input("Ensure 2 SYSREF edges... (press <ENTER>)\n> ") == "cancel":
-        return
-    printAction( writeReadReg, 0x5C, SYSREF_CLKDIV[0], (SYSREF_CLKDIV[1] & ~0x07) | 0x03 ) # XXXXX011
-    if input("Ensure 2 SYSREF edges... (press <ENTER>)\n> ") == "cancel":
-        return
+    input("Ensure 2 SYSREF edges... (press <ENTER>)")
+    printStep({ \
+        bitData('SYSREF_CLKDIV'     'XXXXXXXX', 'XXXXX011') \
+    })
+    input("Ensure 2 SYSREF edges... (press <ENTER>)")
+    ###############################
     print( "Taking JESD204B core out of reset...")
     printAction( bitOff, 0x00, 0x00, 0x03 )
-    if input("Ensure 2 SYSREF edges... (press <ENTER>)\n> ") == "cancel":
+    if input("Ensure 2 SYSREF edges... (press <ENTER>)")
         return
     print( "Clearing all DAC alarms...")
     rangeAction( writeReadReg, 0x04, 0x05, 0x00, 0x00)
     rangeAction( writeReadReg, 0x64, 0x6D, 0x00, 0x00)
-    if input("Stop SYSREF generation (optional)... (press <ENTER>)\n> ") == "cancel":
+    if input("Stop SYSREF generation (optional)... (press <ENTER>)")
         return
     print( "SPI_TXENABLE set to 1 (OR'd with TXENABLE pin)...")
     printAction( bitOn, 0x0D, 0x00, 0x01)

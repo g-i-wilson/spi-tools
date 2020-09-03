@@ -16,7 +16,7 @@ def createByteList(addrList, dataList):
 def printByteList(byteList):
     str = ""
     for byte in byteList:
-        str += hex(byte)
+        str += hex(byte)+" "
     return str
 
 def readModifyWrite(old=[], mask=[], new=[]):
@@ -48,6 +48,22 @@ def printStruct(struct):
         else:
             printReg(name, addr=struct[name]['addr_w'], data=struct[name]['data'], note=struct[name]['info'])
 
+def bitMaskToBytes(bitStrArray):
+    data = []
+    mask = []
+    for bitStr in bitStrArray:
+        bit = 0x80
+        bitMask = 0x00
+        bitData = 0x00
+        for aChar in bitStr:
+            if aChar == '1' or aChar == '0':
+                bitMask += bit
+            if aChar == '1':
+                bitData += bit
+            bit = bit >> 1
+        data.append(bitData)
+        mask.append(bitMask)
+    return {"data":data, "mask":mask}
 
 
 
@@ -86,7 +102,7 @@ class Device:
         for name in struct:
             if name in self.defaultMap.keys():
                 for key in self.defaultMap[name].keys():
-                    if not key in struct.keys():
+                    if not key in struct[name].keys():
                         struct[name][key] = self.defaultMap[name][key]
 
     def writeStruct(self, struct):
@@ -106,6 +122,7 @@ class Device:
             if dbg:
                 print("Write: "+name+", "+printByteList(createByteList(struct[name]['addr_w'], struct[name]['data'])))
             self.write( createByteList(struct[name]['addr_w'], struct[name]['data']) )
+        return struct
 
     def readStruct(self, struct):
         self.fillDefaults(struct)
@@ -116,13 +133,29 @@ class Device:
                         if dbg:
                             print("Write: "+pre_name+", "+printByteList(createByteList(struct[name]['addr_w'], step[pre_name])))
                         self.write( createByteList(self.defaultMap[pre_name]['addr_w'], step[pre_name]) )
-            if dbg:
-                print("Read: "+name+", "+printByteList(struct[name]['addr_r']))
             struct[name]['data'] = self.read( struct[name]['addr_r'], len(struct[name]['data']) )
+            if dbg:
+                print("Read: "+name+", "+printByteList(createByteList(struct[name]['addr_r'], struct[name]['data'])))
+        return struct
 
-    def currentState(self):
+    def currentState(self, display=True):
         currentState = {}
         for name in self.defaultMap:
             currentState[name] = {}
-        self.readStruct(currentState)
-        return currentState
+        if display:
+            printStruct(currentState)
+        return self.readStruct(currentState)
+
+    def writeDefault(self, display=True):
+        struct = self.writeStruct(self.defaultMap)
+        return self.currentState(display)
+
+    def writeBits(self, name, bitStrings=[], display=True):
+        struct = self.writeStruct( { name : bitMaskToBytes(bitStrings) } )
+        if display:
+            printStruct(struct)
+        return struct
+
+    def writeBitsList(self, bitsList):
+        for bits in bitsList:
+            self.writeBits(name=bits[0], bitStrings=bits[1])

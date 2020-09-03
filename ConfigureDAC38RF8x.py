@@ -1,14 +1,14 @@
 import time
 import sys
-import DAC38RF8x
-from regdisplay import *
+import FTDISPI
 import JSONFile
 
 ##########################################
 # SPI configuration class
 ##########################################
 
-dacSpi = DAC38RF8x.SpiConfig()
+dac = FTDISPI.Device(defaultMap="DAC38RF8x.json")
+
 
 
 ##########################################
@@ -27,112 +27,121 @@ def VCO_OK(Tj, LFVOLT):
     else:
         return False
 
-class VCOTuner:
-    def __init__(self,VCOLow, VCOHigh, VCOInc):
-        self.VCOLow = VCOLow
-        self.VCOHigh = VCOHigh
-        self.VCOInc = VCOInc
-        self.VCOFreq = VCOLow
-    def value(self):
-        return self.VCOFreq
-    def tune(self):
-        while(1):
-            PLL_CONFIG = printRead(0x06)
-            writeReg(0x33, self.VCOFreq, PLL_CONFIG[1])
-            TEMP_PLLVOLT = readReg(0x06)
-            TEMPDATA = TEMP_PLLVOLT[0]
-            PLL_LFVOLT = (TEMP_PLLVOLT[1] >> 5)
-            # print( ("\b"*100)+"Freq: "+str(self.VCOFreq)+", TEMPTDATA: "+str(TEMPDATA)+", PLL_LFVOLT: "+str(PLL_LFVOLT), end='' )
-            print( "Freq: "+str(self.VCOFreq)+", TEMPTDATA: "+str(TEMPDATA)+", PLL_LFVOLT: "+str(PLL_LFVOLT) )
-            self.VCOFreq += self.VCOInc
-            if (VCO_OK(TEMPDATA, PLL_LFVOLT) or self.VCOFreq >= self.VCOHigh):
-                break
-        print()
-
-
-def printStep(data):
-    printData(dacSpi.inDataOutRegData(data))
-
-def bitMaskToBytes(bitStr):
-    bit = 0x80
-    bitMask = 0x00
-    bitData = 0x00
-    for char in bitStr:
-        if char == '1' or char == '0':
-            bitMask += bit
-        if char == '1':
-            bitData += bit
-        bit /= 2
-    return {'data':bitData, 'mask':bitMask}
-
-def bitData(name, upper, lower):
-    upperByte = bitMaskToBytes(upper)
-    lowerByte = bitMaskToBytes(lower)
-    return { \
-        name : { \
-            'data': [ upperByte['data'], lowerByte['data'] ], \
-            'mask': [ lowerByte['mask'], lowerByte['mask'] ]  \
-        } \
-    }
 
 
 def startupSequence():
     ###############################
-    print (     "SPI_TXENABLE set to 0 (OR'd with TXENABLE pin)")
-    printStep({ \
-        bitData('JESD_FIFO',        'XXXXXXXX', 'XXXXXXX1') \
-    })
+    print ( \
+        "SPI_TXENABLE set to 0 (OR'd with TXENABLE pin)" \
+    )
+    dac.writeBits( \
+        'JESD_FIFO',        ['XXXXXXXX', 'XXXXXXX0'] \
+    )
     ###############################
     while(1):
-        input(  "Depress RESETB push-button (press <ENTER>)")
-        VENDOR_VER = printRead(dacSpi.readPageReg, 'VENDOR_VER')
-        if (VENDOR_VER[0] & 0xFC == 0x80): # 0b100000XX
+        input( "Depress RESETB push-button (press <ENTER>)" )
+        struct = dac.readStruct({'VENDOR_VER':{}})
+        if (struct['VENDOR_VER']['data'][0] & 0xFC == 0x80): # 100000XX XXXXXXXX
             break
-    pllMode = input("Tune PLL? [y/N]\n> ")
+    pllMode = input( "Tune PLL? [y/N]\n> " )
     if (pllMode.lower() == "y"):
-        t = VCOTuner(0x10, 0x40, 0x01)
-        t.tune()
+        vcoLow = 0x10
+        vcoHigh = 0x40
+        vcoIncrement = 0x01
+        vcoFreq = 0x00
+        while(1):
+            dac.writeStruct({'PLL_CONFIG2':{'data':[vcoFreq,0x00], 'mask':[0x7F,0x00]}}) # X_______ XXXXXXXX
+            tempVoltage     = dac.readStruct({'TEMP_PLLVOLT':{}})
+            TEMPDATA        = tempVoltage['TEMP_PLLVOLT']['data'][0]
+            PLL_LFVOLT      = tempVoltage['TEMP_PLLVOLT']['data'][1] >> 5
+            print( "Freq: "+str(vcoFreq)+", TEMPTDATA: "+str(TEMPDATA)+", PLL_LFVOLT: "+str(PLL_LFVOLT) )
+            vcoFreq += vcoIncrement
+            if VCO_OK(TEMPDATA, PLL_LFVOLT):
+                break
+            elif vcoFreq >= vcoHigh:
+                print( "Max VCO freq reached" )
+                break
     ###############################
-    input(      "Start SYSREF generation... (press <ENTER>)")
+    input( \
+        "Start SYSREF generation... (press <ENTER>)" \
+    )
     ###############################
-    print(      "Encoder block in reset...")
-    printStep({ \
-        bitData('SYSREF_CLKDIV',    'XXXXXXXX', 'X000XXXX'), \
-        bitData('JESD_SYSR_MODE',   'XXXXXXXX', 'XXXXX000'), \
-        bitData('MULTIDUC_CFG1',    '1XXXXXXX', 'XXXXXXXX') \
-    })
-    input(      "Ensure 2 SYSREF edges... (press <ENTER>)")
-    printStep({ \
-        bitData('CLK_CONFIG',       '1XXXXXXX', 'XXXXXXXX') \
-    })
+    print( \
+        "Encoder block in reset..." \
+    )
+    dac.writeBitsList([ \
+        ['SYSREF_CLKDIV',   ['XXXXXXXX', 'X000XXXX']], \
+        ['JESD_SYSR_MODE',  ['XXXXXXXX', 'XXXXX000']], \
+        ['MULTIDUC_CFG1',   ['1XXXXXXX', 'XXXXXXXX']], \
+    ])
+    input( \
+        "Ensure 2 SYSREF edges... (press <ENTER>)" \
+    )
+    dac.writeBits( \
+        'CLK_CONFIG',       ['1XXXXXXX', 'XXXXXXXX'] \
+    )
     ###############################
-    print(      "JESD core in reset...")
-    printStep({
-        bitData('RESET_CONFIG',     'XXXXXXXX', 'XXXXX111') \
-    })
+    print( \
+        "JESD core in reset..." \
+    )
+    dac.writeBits( \
+        'RESET_CONFIG',     ['XXXXXXXX', 'XXXXX111'] \
+    )
     ###############################
-    print(      "Synchronizing CDRV and JESD204B blocks...")
-    printStep({ \
-        bitData('SYSREF_CLKDIV'     'XXXXXXXX', 'X010XXXX') \
-    })
-    input("Ensure 2 SYSREF edges... (press <ENTER>)")
-    printStep({ \
-        bitData('SYSREF_CLKDIV'     'XXXXXXXX', 'XXXXX011') \
-    })
-    input("Ensure 2 SYSREF edges... (press <ENTER>)")
+    print( \
+        "Synchronizing CDRV and JESD204B blocks..." \
+    )
+    dac.writeBits( \
+        'SYSREF_CLKDIV'     ['XXXXXXXX', 'X010XXXX'] \
+    )
+    input( \
+        "Ensure 2 SYSREF edges... (press <ENTER>)" \
+    )
+    dac.writeBits( \
+        'SYSREF_CLKDIV'     ['XXXXXXXX', 'XXXXX011'] \
+    )
+    input( \
+        "Ensure 2 SYSREF edges... (press <ENTER>)" \
+    )
     ###############################
-    print( "Taking JESD204B core out of reset...")
-    printAction( bitOff, 0x00, 0x00, 0x03 )
-    if input("Ensure 2 SYSREF edges... (press <ENTER>)")
-        return
-    print( "Clearing all DAC alarms...")
-    rangeAction( writeReadReg, 0x04, 0x05, 0x00, 0x00)
-    rangeAction( writeReadReg, 0x64, 0x6D, 0x00, 0x00)
-    if input("Stop SYSREF generation (optional)... (press <ENTER>)")
-        return
-    print( "SPI_TXENABLE set to 1 (OR'd with TXENABLE pin)...")
-    printAction( bitOn, 0x0D, 0x00, 0x01)
-    print( "Done." )
+    print( \
+        "Taking JESD204B core out of reset..." \
+    )
+    dac.writeBits( \
+        'RESET_CONFIG',     ['1XXXXXXX', 'XXXXXX11'] )
+    input( \
+        "Ensure 2 SYSREF edges... (press <ENTER>)" \
+    )
+    ###############################
+    print( \
+        "Clearing all alarms..." \
+    )
+    dac.writeBitsList([ \
+        ['ALM_SD_DET',      ['00000000', '00000000']], \
+        ['ALM_SYSREF_DET',  ['00000000', '00000000']], \
+        ['JESD_ALM_L0',     ['00000000', '00000000']], \
+        ['JESD_ALM_L1',     ['00000000', '00000000']], \
+        ['JESD_ALM_L2',     ['00000000', '00000000']], \
+        ['JESD_ALM_L3',     ['00000000', '00000000']], \
+        ['JESD_ALM_L4',     ['00000000', '00000000']], \
+        ['JESD_ALM_L5',     ['00000000', '00000000']], \
+        ['JESD_ALM_L6',     ['00000000', '00000000']], \
+        ['ALM_SYSREF_PAP',  ['00000000', '00000000']], \
+        ['ALM_CLKDIV1',     ['00000000', '00000000']], \
+    ])
+    input( \
+        "Stop SYSREF generation (optional)... (press <ENTER>)" \
+    )
+    print( \
+        "SPI_TXENABLE set to 1 (OR'd with TXENABLE pin)..." \
+    )
+    dac.writeBits( \
+        'JESD_FIFO', ['XXXXXXXX', 'XXXXXXX1'] \
+    )
+    ###############################
+    print( \
+        "Done." \
+    )
 
 
 
@@ -172,12 +181,10 @@ while (ui[0] != "exit"):
         printRead( dacSpi.readPageReg, ui[1] )
     if (ui[0] == "write"):
         writeData = { ui[1] : { 'data':[ int(ui[2],16), int(ui[3],16) ] } }
-        printData( dacSpi.inDataOutRegData(writeData) )
-        # printAction( dacSpi.writeReadPageReg, ui[1], int(ui[2],16), int(ui[3],16) )
+        FTDISPI.printStruct( dac.writeStruct(writeData) )
     if (ui[0] == "writeBits"):
         writeData = { ui[1] : { 'data':[ int(ui[2],16), int(ui[3],16) ], 'mask':[ int(ui[4],16), int(ui[5],16) ] } }
-        printData( dacSpi.inDataOutRegData(writeData) )
-        # printAction( dacSpi.writeReadPageReg, ui[1], int(ui[2],16), int(ui[3],16) )
+        FTDISPI.printStruct( dac.writeStruct(writeData) )
     if (ui[0] == "on"):
         printAction( dacSpi.bitsOn, ui[1], int(ui[2],16), int(ui[3],16) )
     if (ui[0] == "off"):
@@ -190,20 +197,13 @@ while (ui[0] != "exit"):
                 dacJSON = JSONFile.new(ui[1])
             else:
                 dacJSON = JSONFile.new(input("\nSave as: "))
-        dacData = dacSpi.outRegData()
-        dacJSON.write( dacData )
-        printData( dacSpi.outRegData() )
+        dacJSON.write( dac.currentState() )
     if (ui[0] == "load"):
         if dacJSON is None:
             dacJSON = JSONFile.load(ui[1])
-        dacSpi.inDataOutRegData(dacJSON.read())
-        printData( dacSpi.outRegData() )
+        dac.writeStruct(dacJSON.read())
+        dac.currentState()
     if (ui[0] == "loadDefault"):
-        dacSpi.inDataOutRegData(dacSpi.outDefData())
-        printData( dacSpi.outRegData() )
-    # if (ui[0] == "spiReset"):
-        # spiReset()
-    # if (ui[0] == "zeroRange"):
-    #     # rangeWrite(writeReadReg, uiVal[0], uiVal[1], 0x00, 0x00)
+        dac.writeDefault()
     if (ui[0] == "startup"):
         startupSequence()

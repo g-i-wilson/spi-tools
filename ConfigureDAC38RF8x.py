@@ -2,18 +2,20 @@ import time
 import sys
 import FTDISPI
 import JSONFile
-
-##########################################
-# SPI configuration class
-##########################################
-
-dac = FTDISPI.Device(defaultMap="DAC38RF8x.json")
+from pyftdi.spi import SpiController
 
 
+spi = SpiController()
+spi.configure('ftdi:///2')
 
-##########################################
-# Class to tune VCO
-##########################################
+dac = FTDISPI.Device( \
+    slave       = spi.get_port(cs=0, freq=1E6, mode=0), \
+    defaultMap  = "DAC38RF8x.json", \
+    currentState = "DAC_current_state.json", \
+    previousState = "DAC_previous_state.json",
+)
+
+
 
 def VCO_OK(Tj, LFVOLT):
     if (Tj >= 108 and (LFVOLT == 5 or LFVOLT == 6)):
@@ -28,8 +30,12 @@ def VCO_OK(Tj, LFVOLT):
         return False
 
 
+def dispChanges():
+    dac.compare(pre_display="\n*** All changes ***", post_display="---------------")
+
 
 def startupSequence():
+    dac.readState(display=False)
     ###############################
     print ( \
         "SPI_TXENABLE set to 0 (OR'd with TXENABLE pin)" \
@@ -37,13 +43,17 @@ def startupSequence():
     dac.writeBits( \
         'JESD_FIFO',        ['XXXXXXXX', 'XXXXXXX0'] \
     )
+    dispChanges()
     ###############################
     while(1):
         input( "Depress RESETB push-button (press <ENTER>)" )
-        struct = dac.readStruct({'VENDOR_VER':{}})
+        struct = dac.readStruct({'VENDOR_VER':{}}, display=True)
         if (struct['VENDOR_VER']['data'][0] & 0xFC == 0x80): # 100000XX XXXXXXXX
             break
-    pllMode = input( "Tune PLL? [y/N]\n> " )
+    pllMode = input( "Use PLL? [y/N]\n> " )
+    dac.writeBits( \
+        'CLK_PLL_CFG',      ['XXXXX1XX', 'XXXXXXXX'] \
+    )
     if (pllMode.lower() == "y"):
         vcoLow = 0x10
         vcoHigh = 0x40
@@ -80,6 +90,7 @@ def startupSequence():
     dac.writeBits( \
         'CLK_CONFIG',       ['1XXXXXXX', 'XXXXXXXX'] \
     )
+    dispChanges()
     ###############################
     print( \
         "JESD core in reset..." \
@@ -87,6 +98,7 @@ def startupSequence():
     dac.writeBits( \
         'RESET_CONFIG',     ['XXXXXXXX', 'XXXXX111'] \
     )
+    dispChanges()
     ###############################
     print( \
         "Synchronizing CDRV and JESD204B blocks..." \
@@ -100,6 +112,7 @@ def startupSequence():
     dac.writeBits( \
         'SYSREF_CLKDIV',    ['XXXXXXXX', 'XXXXX011'] \
     )
+    dispChanges()
     input( \
         "Ensure 2 SYSREF edges... (press <ENTER>)" \
     )
@@ -108,7 +121,9 @@ def startupSequence():
         "Taking JESD204B core out of reset..." \
     )
     dac.writeBits( \
-        'RESET_CONFIG',     ['1XXXXXXX', 'XXXXXX11'] )
+        'RESET_CONFIG',     ['1XXXXXXX', 'XXXXXX11'] \
+    )
+    dispChanges()
     input( \
         "Ensure 2 SYSREF edges... (press <ENTER>)" \
     )
@@ -138,6 +153,7 @@ def startupSequence():
     dac.writeBits( \
         'JESD_FIFO', ['XXXXXXXX', 'XXXXXXX1'] \
     )
+    dispChanges()
     ###############################
     print( \
         "Done." \
@@ -157,7 +173,7 @@ print()
 print("Command set:")
 print("write <REG_NAME> XXXX1010 1XXXXXX0       | Write bits (any char not 0 or 1 is a don't-care)")
 print("read <REG_NAME>                          | Read register")
-print("readAll                                  | Read all registers")
+print("all                                      | Read all registers")
 print("save <fileName>                          | Save registers to JSON file")
 print("load <fileName>                          | Load and write registers from JSON file")
 print("loadDefault                              | Load datasheet default JSON configuration")
@@ -175,15 +191,16 @@ while (ui[0] != "exit"):
         dac.readStruct({ ui[1] : {} }, display=True)
     if (ui[0] == "write"):
         dac.writeBits( ui[1], [ ui[2], ui[3] ] )
-    if (ui[0] == "readAll"):
+    if (ui[0] == "all"):
         dac.readState()
     if (ui[0] == "compare"):
         dac.compare()
     if (ui[0] == "trigger"):
         while(1):
-            print(chr(27)+"[2J")
-            dac.trigger()
-            time.sleep(1)
+            dac.trigger(pre_display=chr(27)+"[2J")
+            time.sleep(.5)
+            if not sys.stdin.isatty():
+                break
     if (ui[0] == "save"):
         if dacJSON is None:
             if len(ui) > 1:

@@ -23,28 +23,52 @@ def readModifyWrite(old=[], mask=[], new=[]):
     for i in range(len(old)):
         new[i] = (old[i] & ~mask[i]) | new[i]
 
-def printByte(aByte):
-    for aBit in range(8):
-        if ((aByte >> (7-aBit)) & 0x01):
-            print("1 ", end='')
-        else:
-            print("_ ", end='')
+class bcolors:
+    WHITE = '\033[37m'
+    BLUE = '\033[94m'
+    GREEN = '\033[92m'
+    RED = '\033[31m'
+    RESET = '\033[0m'
 
-def printReg(addrName, addr=[], data=[], note="", nameColWidth=18):
+def printByte(a, b):
+    for bit in range(8):
+        a_bit = (a >> (7-bit)) & 0x01
+        b_bit = (b >> (7-bit)) & 0x01
+        if a_bit and b_bit:
+            print("1", end='')
+        elif (not a_bit) and b_bit:
+            print(bcolors.GREEN, end='')
+            print("1", end='')
+        elif a_bit and (not b_bit):
+            print(bcolors.RED, end='')
+            print("0", end='')
+        else:
+            print("0", end='')
+        print(bcolors.RESET, end='')
+    print(end='  ')
+
+def printReg(addrName, addr=[], data=[], old_data=None, note="", nameColWidth=18):
     print( addrName+(" "*(nameColWidth-len(addrName))), end=' ')
     for a in addr:
-        print("0x{:02x}".format(a), end=' ')
+        if old_data:
+            print(bcolors.GREEN, end='')
+            print("0x{:02x}".format(a), end=' ')
+            print(bcolors.RESET, end='')
+        else:
+            print("0x{:02x}".format(a), end=' ')
     print('  |  ', end='')
-    for d in data:
-        print("0x{:02x}".format(d), end=' ')
-        printByte(d)
+    for i in range(len(data)):
+        print("0x{:02x}".format(data[i]), end=' ')
+        if old_data:
+            printByte(old_data[i], data[i])
+        else:
+            printByte(data[i], data[i])
     print('  |  '+note)
 
 def printStruct(struct):
     for name in struct:
         if 'old_data' in struct[name]:
-            printReg(name, addr=struct[name]['addr_w'], data=struct[name]['old_data'], note=struct[name]['info'])
-            printReg("--> "+name, addr=struct[name]['addr_w'], data=struct[name]['data'], note=struct[name]['info'])
+            printReg(name, addr=struct[name]['addr_w'], data=struct[name]['data'], old_data=struct[name]['old_data'], note=struct[name]['info'])
         else:
             printReg(name, addr=struct[name]['addr_w'], data=struct[name]['data'], note=struct[name]['info'])
 
@@ -70,16 +94,20 @@ def bitMaskToBytes(bitStrArray):
 
 class Device:
 
-    def __init__(self, ftdiDevice='ftdi:///2', defaultMap='default.json', cs=0, freq=1E6, mode=0):
+    def __init__(self, slave, defaultMap, currentState, previousState):
         # SPI controller object
-        self.spi = SpiController()
-        self.spi.configure(ftdiDevice)
-        self.slave = self.spi.get_port(cs, freq, mode)
+        self.slave = slave
         # default register map
         self.defaultMap = JSONFile.load(defaultMap).read()
         # states for comparison
-        self.previousState = None
-        self.currentState = None
+        self.previousState = JSONFile.load(previousState)
+        if self.previousState is None:
+            print("Unable to load "+currentState)
+            exit()
+        self.currentState = JSONFile.load(currentState)
+        if self.currentState is None:
+            print("Unable to load "+currentState)
+            exit()
 
     def write(self, byteList):
         self.slave.exchange( \
@@ -92,7 +120,7 @@ class Device:
         )
 
     def read(self, byteList, readSize):
-        return self.slave.exchange( \
+        byteArray = self.slave.exchange( \
             out=byteList, \
             readlen=readSize, \
             start=True, \
@@ -100,6 +128,10 @@ class Device:
             duplex=False, \
             droptail=0 \
         )
+        byteList = []
+        for byte in byteArray:
+            byteList.append(byte)
+        return byteList
 
     def fillDefaults(self, struct={}):
         for name in struct:
@@ -146,54 +178,49 @@ class Device:
         return struct
 
     def readState(self, display=True):
-        self.previousState = self.currentState
+        self.previousState.write(self.currentState.read())
         struct = {}
         for name in self.defaultMap:
             struct[name] = {}
-        self.currentState = self.readStruct(struct, display)
-        print("*************after**************")
-        print(self.previousState)
-        print("*************after**************")
-        print(self.currentState)
-        return self.currentState
+        self.currentState.write(self.readStruct(struct, display))
+        return self.currentState.read()
 
-    def compare(self, display=True):
+    def compare(self, display=True, pre_display="", post_display=""):
+        self.readState(display=False)
         comparison = {}
-        if self.previousState is None:
-            # load previous and current states
-            self.previousState = self.readState(display=False)
-            print("*************after**************")
-            print(self.previousState)
-            print("*************after**************")
-            print(self.currentState)
-            # self.previousState = self.currentState
-        for name in self.currentState:
+        if len(self.previousState.read().keys()) == 0:
+             self.readState(display=False)
+        for name in self.currentState.read():
             # aliases
-            prevData = self.previousState[name]['data']
-            currData = self.currentState[name]['data']
+            prevData = self.previousState.read()[name]['data']
+            currData = self.currentState.read()[name]['data']
             same = True
             for i in range(len(currData)):
                 if currData[i] != prevData[i]:
                     same = False
             if not same:
+                comparison[name] = {}
                 comparison[name]['data'] = currData
                 comparison[name]['old_data'] = prevData
-        if display:
-            self.printStruct(comparison)
+                self.fillDefaults(comparison)
+        if display and len(comparison.keys()) > 0:
+            print(pre_display)
+            printStruct(comparison)
+            print(post_display)
         return comparison
 
-    def trigger(self, display=True):
+    def trigger(self, display=True, pre_display=""):
         while(1):
-            self.readState(display=False)
             comp = self.compare(display=False)
             if len(comp.keys()) > 0:
                 if display:
-                    self.printStruct(comp)
+                    print(pre_display)
+                    printStruct(comp)
                 return comp
 
     def writeDefault(self, display=True):
         struct = self.writeStruct(self.defaultMap)
-        return self.currentState(display)
+        return self.readState(display)
 
     def writeBits(self, name, bitStrings=[], display=True):
         struct = self.writeStruct( { name : bitMaskToBytes(bitStrings) }, display )

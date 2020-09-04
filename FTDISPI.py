@@ -77,6 +77,9 @@ class Device:
         self.slave = self.spi.get_port(cs, freq, mode)
         # default register map
         self.defaultMap = JSONFile.load(defaultMap).read()
+        # states for comparison
+        self.previousState = None
+        self.currentState = None
 
     def write(self, byteList):
         self.slave.exchange( \
@@ -105,7 +108,7 @@ class Device:
                     if not key in struct[name].keys():
                         struct[name][key] = self.defaultMap[name][key]
 
-    def writeStruct(self, struct):
+    def writeStruct(self, struct, display=False):
         self.fillDefaults(struct)
         for name in struct:
             if 'mask' in struct[name]:
@@ -122,9 +125,11 @@ class Device:
             if dbg:
                 print("Write: "+name+", "+printByteList(createByteList(struct[name]['addr_w'], struct[name]['data'])))
             self.write( createByteList(struct[name]['addr_w'], struct[name]['data']) )
+        if display:
+            printStruct(struct)
         return struct
 
-    def readStruct(self, struct):
+    def readStruct(self, struct, display=False):
         self.fillDefaults(struct)
         for name in struct:
             if 'pre_r' in struct[name]:
@@ -136,24 +141,62 @@ class Device:
             struct[name]['data'] = self.read( struct[name]['addr_r'], len(struct[name]['data']) )
             if dbg:
                 print("Read: "+name+", "+printByteList(createByteList(struct[name]['addr_r'], struct[name]['data'])))
+        if display:
+            printStruct(struct)
         return struct
 
-    def currentState(self, display=True):
-        currentState = {}
+    def readState(self, display=True):
+        self.previousState = self.currentState
+        struct = {}
         for name in self.defaultMap:
-            currentState[name] = {}
+            struct[name] = {}
+        self.currentState = self.readStruct(struct, display)
+        print("*************after**************")
+        print(self.previousState)
+        print("*************after**************")
+        print(self.currentState)
+        return self.currentState
+
+    def compare(self, display=True):
+        comparison = {}
+        if self.previousState is None:
+            # load previous and current states
+            self.previousState = self.readState(display=False)
+            print("*************after**************")
+            print(self.previousState)
+            print("*************after**************")
+            print(self.currentState)
+            # self.previousState = self.currentState
+        for name in self.currentState:
+            # aliases
+            prevData = self.previousState[name]['data']
+            currData = self.currentState[name]['data']
+            same = True
+            for i in range(len(currData)):
+                if currData[i] != prevData[i]:
+                    same = False
+            if not same:
+                comparison[name]['data'] = currData
+                comparison[name]['old_data'] = prevData
         if display:
-            printStruct(currentState)
-        return self.readStruct(currentState)
+            self.printStruct(comparison)
+        return comparison
+
+    def trigger(self, display=True):
+        while(1):
+            self.readState(display=False)
+            comp = self.compare(display=False)
+            if len(comp.keys()) > 0:
+                if display:
+                    self.printStruct(comp)
+                return comp
 
     def writeDefault(self, display=True):
         struct = self.writeStruct(self.defaultMap)
         return self.currentState(display)
 
     def writeBits(self, name, bitStrings=[], display=True):
-        struct = self.writeStruct( { name : bitMaskToBytes(bitStrings) } )
-        if display:
-            printStruct(struct)
+        struct = self.writeStruct( { name : bitMaskToBytes(bitStrings) }, display )
         return struct
 
     def writeBitsList(self, bitsList):

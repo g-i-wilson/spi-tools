@@ -92,13 +92,13 @@ def startupSequence():
         "Synchronizing CDRV and JESD204B blocks..." \
     )
     dac.writeBits( \
-        'SYSREF_CLKDIV'     ['XXXXXXXX', 'X010XXXX'] \
+        'SYSREF_CLKDIV',    ['XXXXXXXX', 'X010XXXX'] \
     )
     input( \
         "Ensure 2 SYSREF edges... (press <ENTER>)" \
     )
     dac.writeBits( \
-        'SYSREF_CLKDIV'     ['XXXXXXXX', 'XXXXX011'] \
+        'SYSREF_CLKDIV',    ['XXXXXXXX', 'XXXXX011'] \
     )
     input( \
         "Ensure 2 SYSREF edges... (press <ENTER>)" \
@@ -155,17 +155,13 @@ dacJSON = None
 print("**** DAC38RF8x SPI Register Config ****")
 print()
 print("Command set:")
-print("write <ADDR> <upperByte> <lowerByte>     | Write register")
-print("enable4Wire                              | Enables 4-wire mode (called when program starts)")
-print("read <ADDR>                              | Read register (4-wire mode only)")
-print("on <ADDR> <upperMask> <lowerMask>        | Set bit to 1 (4-wire mode only)")
-print("off <ADDR> <upperMask> <lowerMask>       | Set bit to 0 (4-wire mode only)")
+print("write <REG_NAME> XXXX1010 1XXXXXX0       | Write bits (any char not 0 or 1 is a don't-care)")
+print("read <REG_NAME>                          | Read register")
 print("readAll                                  | Read all registers")
-print("enableAll                                | Enable all register pages")
-print("save <fileName>                          | Save registers to a file (4-wire mode only)")
-print("load <fileName>                          | Load and write registers from a file")
-print("loadDefault                              | Load datasheet default configuration")
-print("spiReset                                 | Write 0x80 0x00 to address 0x00")
+print("save <fileName>                          | Save registers to JSON file")
+print("load <fileName>                          | Load and write registers from JSON file")
+print("loadDefault                              | Load datasheet default JSON configuration")
+print("startup                                  | Step through DAC startup sequence")
 print("exit                                     | Exit the program")
 print()
 print()
@@ -175,34 +171,31 @@ while (ui[0] != "exit"):
     print("\n> ", end='')
     ui = sys.stdin.readline().rstrip().split(' ')
 
-    if (ui[0] == "duc"):
-        dacSpi.setDUC(int(ui[1],16))
     if (ui[0] == "read"):
-        printRead( dacSpi.readPageReg, ui[1] )
+        dac.readStruct({ ui[1] : {} }, display=True)
     if (ui[0] == "write"):
-        writeData = { ui[1] : { 'data':[ int(ui[2],16), int(ui[3],16) ] } }
-        FTDISPI.printStruct( dac.writeStruct(writeData) )
-    if (ui[0] == "writeBits"):
-        writeData = { ui[1] : { 'data':[ int(ui[2],16), int(ui[3],16) ], 'mask':[ int(ui[4],16), int(ui[5],16) ] } }
-        FTDISPI.printStruct( dac.writeStruct(writeData) )
-    if (ui[0] == "on"):
-        printAction( dacSpi.bitsOn, ui[1], int(ui[2],16), int(ui[3],16) )
-    if (ui[0] == "off"):
-        printAction( dacSpi.bitsOff, ui[1], int(ui[2],16), int(ui[3],16) )
+        dac.writeBits( ui[1], [ ui[2], ui[3] ] )
     if (ui[0] == "readAll"):
-        printData( dacSpi.outRegData() )
+        dac.readState()
+    if (ui[0] == "compare"):
+        dac.compare()
+    if (ui[0] == "trigger"):
+        while(1):
+            print(chr(27)+"[2J")
+            dac.trigger()
+            time.sleep(1)
     if (ui[0] == "save"):
         if dacJSON is None:
             if len(ui) > 1:
                 dacJSON = JSONFile.new(ui[1])
             else:
                 dacJSON = JSONFile.new(input("\nSave as: "))
-        dacJSON.write( dac.currentState() )
+        dacJSON.write( dac.readState() )
     if (ui[0] == "load"):
         if dacJSON is None:
             dacJSON = JSONFile.load(ui[1])
         dac.writeStruct(dacJSON.read())
-        dac.currentState()
+        dac.readState()
     if (ui[0] == "loadDefault"):
         dac.writeDefault()
     if (ui[0] == "startup"):

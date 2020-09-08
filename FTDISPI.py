@@ -1,4 +1,5 @@
 from pyftdi.spi import SpiController
+from pyftdi.gpio import GpioSyncController
 import time
 import sys
 import JSONFile
@@ -92,23 +93,105 @@ def bitMaskToBytes(bitStrArray):
 
 
 
-class Device:
+class GPIO:
+    def __init__(self, gpio, SCLK=0x10, MOSI=0x20, MISO=0x40, CS=0x80):
+        self.gpio = gpio
+        self.SCLK = SCLK
+        self.MOSI = MOSI
+        self.MISO = MISO
+        self.CS = CS
+        self.txList = []
+        self.readFlag = []
+        self.rxList = []
+    def transaction(self, byteList, readSize=0): # readSize 0 is simply a write
+        self.txList = [self.CS] # CS high, others low
+        self.readFlag = []
+        self.insertDelay(4)
+        self.clockLow()
+        self.csLow()
+        for aByte in byteList:
+            self.writeByte(aByte)
+            self.readFlag.append(False)
+        for i in range(readSize):
+            self.writeByte(0x00)
+            self.readFlag.append(True)
+        self.csHigh()
+        self.clockLow()
+        self.insertDelay(4)
+        self.transmit()
+    def insertDelay(self, d):
+        for i in range(d):
+            self.txList.append(self.txList[-1])
+    def clockLow(self):
+        self.txList.append( self.txList[-1] & ~self.SCLK )
+    def clockLowdataHigh(self):
+        self.txList.append( (self.txList[-1] & ~self.SCLK) | self.MOSI )
+    def clockLowdataLow(self):
+        self.txList.append( (self.txList[-1] & ~self.SCLK) & ~self.MOSI )
+    def clockHigh(self):
+        self.txList.append( self.txList[-1] | self.SCLK )
+    def csLow(self):
+        self.txList.append( self.txList[-1] & ~self.CS )
+    def csHigh(self):
+        self.txList.append( self.txList[-1] | self.CS )
+    def writeByte(self, aByte):
+        for i in range(8):
+            shiftPlaces = 7-i # MSB first "big endian"
+            # clock falling edge and data transition
+            if ((aByte >> shiftPlaces) & 0x01):
+                self.clockLowdataHigh()
+            else:
+                self.clockLowdataLow()
+            # clock rising edge
+            self.clockHigh()
+    def readByte(self):
+        self.writeByte(0x00, read=True)
+    def getTxList(self):
+        return self.txList
+    def transmit(self):
+        rxBytes = self.gpio.exchange( self.txList );
+        self.rxList = []
+        for byte in rxBytes:
+            self.rxList.append(byte)
+    def getRxList(self):
+        return self.rxList
+    def getReadFlag(self):
+        return self.readFlag
+    def read(self, byteList, readSize):
+        self.transaction(byteList, readSize)
+        rxByteList = self.readBitBang()
+        rxByteListOut = []
+        for i in range(len(self.readFlag)):
+            if self.readFlag[i]:
+                rxByteListOut.append(rxByteList[1][i])
+        return rxByteListOut
+    def write(self, byteList):
+        self.transaction(byteList)
+    def readBitBang(self):
+        mosiArray = []
+        misoArray = []
+        bitPlace = 7
+        mosiByte = 0x00
+        misoByte = 0x00
+        for a in range(len(self.rxList)):
+            if (not (self.rxList[a-1] & self.SCLK) and (self.rxList[a] & self.SCLK)): # rising edge
+                if (self.rxList[a] & self.MOSI):
+                    mosiByte += (1 << bitPlace)
+                if (self.rxList[a] & self.MISO): # data=1
+                    misoByte += (1 << bitPlace)
+                bitPlace -= 1
+            if bitPlace < 0:
+                mosiArray.append(mosiByte)
+                misoArray.append(misoByte)
+                mosiByte = 0x00
+                misoByte = 0x00
+                bitPlace = 7
+        return [mosiArray, misoArray]
 
-    def __init__(self, slave, defaultMap, currentState, previousState):
-        # SPI controller object
+
+class MPSSE:
+    def __init__(self, slave):
         self.slave = slave
-        # default register map
-        self.defaultMap = JSONFile.load(defaultMap).read()
-        # states for comparison
-        self.previousState = JSONFile.load(previousState)
-        if self.previousState is None:
-            print("Unable to load "+currentState)
-            exit()
-        self.currentState = JSONFile.load(currentState)
-        if self.currentState is None:
-            print("Unable to load "+currentState)
-            exit()
-
     def write(self, byteList):
         self.slave.exchange( \
             out=byteList, \
@@ -118,7 +201,6 @@ class Device:
             duplex=False, \
             droptail=0 \
         )
-
     def read(self, byteList, readSize):
         byteArray = self.slave.exchange( \
             out=byteList, \
@@ -132,6 +214,25 @@ class Device:
         for byte in byteArray:
             byteList.append(byte)
         return byteList
+
+
+
+class Interface:
+
+    def __init__(self, rwObject, defaultMap, currentState, previousState):
+        self.rwObject = rwObject
+        # default register map
+        self.defaultMap = JSONFile.load(defaultMap).read()
+        # states for comparison
+        self.previousState = JSONFile.load(previousState)
+        if self.previousState is None:
+            print("Unable to load "+currentState)
+            exit()
+        self.currentState = JSONFile.load(currentState)
+        if self.currentState is None:
+            print("Unable to load "+currentState)
+            exit()
+
 
     def fillDefaults(self, struct={}):
         for name in struct:
@@ -153,10 +254,10 @@ class Device:
                     for pre_name in step: # step is a dictionary with one key
                         if dbg:
                             print("Write: "+pre_name+", "+printByteList(createByteList(struct[name]['addr_w'], step[pre_name])))
-                        self.write( createByteList(self.defaultMap[pre_name]['addr_w'], step[pre_name]) )
+                        self.rwObject.write( createByteList(self.defaultMap[pre_name]['addr_w'], step[pre_name]) )
             if dbg:
                 print("Write: "+name+", "+printByteList(createByteList(struct[name]['addr_w'], struct[name]['data'])))
-            self.write( createByteList(struct[name]['addr_w'], struct[name]['data']) )
+            self.rwObject.write( createByteList(struct[name]['addr_w'], struct[name]['data']) )
         if display:
             printStruct(struct)
         return struct
@@ -169,8 +270,8 @@ class Device:
                     for pre_name in step: # step is a dictionary with one key
                         if dbg:
                             print("Write: "+pre_name+", "+printByteList(createByteList(struct[name]['addr_w'], step[pre_name])))
-                        self.write( createByteList(self.defaultMap[pre_name]['addr_w'], step[pre_name]) )
-            struct[name]['data'] = self.read( struct[name]['addr_r'], len(struct[name]['data']) )
+                        self.rwObject.write( createByteList(self.defaultMap[pre_name]['addr_w'], step[pre_name]) )
+            struct[name]['data'] = self.rwObject.read( struct[name]['addr_r'], len(struct[name]['data']) )
             if dbg:
                 print("Read: "+name+", "+printByteList(createByteList(struct[name]['addr_r'], struct[name]['data'])))
         if display:

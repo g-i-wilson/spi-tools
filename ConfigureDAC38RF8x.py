@@ -1,19 +1,42 @@
 import time
 import sys
+from pyftdi.spi import SpiController
 import FTDISPI
 import JSONFile
-from pyftdi.spi import SpiController
-
 
 spi = SpiController()
 spi.configure('ftdi:///2')
+slave = spi.get_port( \
+    cs=0, \
+    freq=1e4, \
+    mode=0 \
+)
+gpio = spi.get_gpio()
+gpio.set_direction( pins=0xF0, direction=0xB0 )
 
-dac = FTDISPI.Device( \
-    slave       = spi.get_port(cs=0, freq=1E6, mode=0), \
+
+dac = FTDISPI.Interface( \
+    FTDISPI.MPSSE(slave), \
     defaultMap  = "DAC38RF8x.json", \
     currentState = "DAC_current_state.json", \
     previousState = "DAC_previous_state.json",
 )
+
+lmk = FTDISPI.Interface( \
+    FTDISPI.GPIO(
+        gpio, \
+        SCLK = 0x10, \
+        MOSI = 0x20, \
+        MISO = 0x40, \
+        CS = 0x80, \
+    ), \
+    defaultMap  = "LMK_default.json", \
+    currentState = "LMK_current_state.json", \
+    previousState = "LMK_previous_state.json",
+)
+
+
+lmk.readState()
 
 
 
@@ -168,6 +191,8 @@ def ui_hex(str):
 
 dacJSON = None
 
+
+
 print("**** DAC38RF8x SPI Register Config ****")
 print()
 print("Command set:")
@@ -178,6 +203,7 @@ print("save <fileName>                          | Save registers to JSON file")
 print("load <fileName>                          | Load and write registers from JSON file")
 print("loadDefault                              | Load datasheet default JSON configuration")
 print("startup                                  | Step through DAC startup sequence")
+print("reconnect                                | Reconnect to the FTDI chip")
 print("exit                                     | Exit the program")
 print()
 print()
@@ -198,9 +224,7 @@ while (ui[0] != "exit"):
     if (ui[0] == "trigger"):
         while(1):
             dac.trigger(pre_display=chr(27)+"[2J")
-            time.sleep(.5)
-            if not sys.stdin.isatty():
-                break
+            time.sleep(1)
     if (ui[0] == "save"):
         if dacJSON is None:
             if len(ui) > 1:

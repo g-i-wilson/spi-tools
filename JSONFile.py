@@ -1,7 +1,7 @@
 import sys
 import json
 
-debug = False
+debug = True
 
 def new(filePath):
     obj = JSONFile(filePath)

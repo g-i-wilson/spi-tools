@@ -22,7 +22,7 @@ lmk = FTDISPI.Interface( \
         MISO = MISO, \
         CS = CS, \
     ), \
-    defaultMap  = "LMK_default.json", \
+    defaultMap  = "LMK04828.json", \
     currentState = "LMK_current_state.json", \
     previousState = "LMK_previous_state.json",
 )

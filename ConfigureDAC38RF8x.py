@@ -8,12 +8,9 @@ spi = SpiController()
 spi.configure('ftdi:///2')
 slave = spi.get_port( \
     cs=0, \
-    freq=1e4, \
+    freq=1e6, \
     mode=0 \
 )
-gpio = spi.get_gpio()
-gpio.set_direction( pins=0xF0, direction=0xB0 )
-
 
 dac = FTDISPI.Interface( \
     FTDISPI.MPSSE(slave), \
@@ -21,22 +18,6 @@ dac = FTDISPI.Interface( \
     currentState = "DAC_current_state.json", \
     previousState = "DAC_previous_state.json",
 )
-
-lmk = FTDISPI.Interface( \
-    FTDISPI.GPIO(
-        gpio, \
-        SCLK = 0x10, \
-        MOSI = 0x20, \
-        MISO = 0x40, \
-        CS = 0x80, \
-    ), \
-    defaultMap  = "LMK_default.json", \
-    currentState = "LMK_current_state.json", \
-    previousState = "LMK_previous_state.json",
-)
-
-
-lmk.readState()
 
 
 

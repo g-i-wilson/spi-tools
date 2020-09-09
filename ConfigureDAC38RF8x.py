@@ -4,6 +4,9 @@ from pyftdi.spi import SpiController
 import FTDISPI
 import JSONFile
 
+
+
+
 spi = SpiController()
 spi.configure('ftdi:///2')
 slave = spi.get_port( \
@@ -11,13 +14,14 @@ slave = spi.get_port( \
     freq=1e6, \
     mode=0 \
 )
-
 dac = FTDISPI.Interface( \
     FTDISPI.MPSSE(slave), \
     defaultMap  = "DAC38RF8x.json", \
     currentState = "DAC_current_state.json", \
     previousState = "DAC_previous_state.json",
 )
+
+
 
 
 
@@ -34,12 +38,11 @@ def VCO_OK(Tj, LFVOLT):
         return False
 
 
-def dispChanges():
-    dac.compare(pre_display="\n*** All changes ***", post_display="---------------")
+# def dispChanges():
+#     dac.compare(pre_display="\n*** All changes ***", post_display="---------------")
 
 
 def startupSequence():
-    dac.readState(display=False)
     ###############################
     print ( \
         "SPI_TXENABLE set to 0 (OR'd with TXENABLE pin)" \
@@ -47,7 +50,7 @@ def startupSequence():
     dac.writeBits( \
         'JESD_FIFO',        ['XXXXXXXX', 'XXXXXXX0'] \
     )
-    dispChanges()
+    # dispChanges()
     ###############################
     while(1):
         input( "Depress RESETB push-button (press <ENTER>)" )
@@ -59,7 +62,7 @@ def startupSequence():
         'CLK_PLL_CFG',      ['XXXXX1XX', 'XXXXXXXX'] \
     )
     if (pllMode.lower() == "y"):
-        vcoLow = 0x10
+        vcoLow = 0x00
         vcoHigh = 0x40
         vcoIncrement = 0x01
         vcoFreq = 0x00
@@ -94,7 +97,7 @@ def startupSequence():
     dac.writeBits( \
         'CLK_CONFIG',       ['1XXXXXXX', 'XXXXXXXX'] \
     )
-    dispChanges()
+    # dispChanges()
     ###############################
     print( \
         "JESD core in reset..." \
@@ -102,7 +105,7 @@ def startupSequence():
     dac.writeBits( \
         'RESET_CONFIG',     ['XXXXXXXX', 'XXXXX111'] \
     )
-    dispChanges()
+    # dispChanges()
     ###############################
     print( \
         "Synchronizing CDRV and JESD204B blocks..." \
@@ -116,7 +119,7 @@ def startupSequence():
     dac.writeBits( \
         'SYSREF_CLKDIV',    ['XXXXXXXX', 'XXXXX011'] \
     )
-    dispChanges()
+    # dispChanges()
     input( \
         "Ensure 2 SYSREF edges... (press <ENTER>)" \
     )
@@ -127,7 +130,7 @@ def startupSequence():
     dac.writeBits( \
         'RESET_CONFIG',     ['1XXXXXXX', 'XXXXXX11'] \
     )
-    dispChanges()
+    # dispChanges()
     input( \
         "Ensure 2 SYSREF edges... (press <ENTER>)" \
     )
@@ -157,7 +160,7 @@ def startupSequence():
     dac.writeBits( \
         'JESD_FIFO', ['XXXXXXXX', 'XXXXXXX1'] \
     )
-    dispChanges()
+    # dispChanges()
     ###############################
     print( \
         "Done." \
@@ -203,7 +206,10 @@ while (ui[0] != "exit"):
     if (ui[0] == "compare"):
         dac.compare()
     if (ui[0] == "trigger"):
-        while(1):
+        loops = 1
+        if len(ui)>1:
+            loops = int(ui[1])
+        for i in range(loops):
             dac.trigger(pre_display=chr(27)+"[2J")
             time.sleep(1)
     if (ui[0] == "save"):

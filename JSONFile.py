@@ -1,7 +1,7 @@
 import sys
 import json
 
-debug = True
+debug = False
 
 def new(filePath):
     obj = JSONFile(filePath)
@@ -71,7 +71,8 @@ class JSONFile:
                 print("Failed to parse JSON string: "+str)
             return None
     def merge(self, data):
-        print(data)
+        if debug:
+            print(data)
         mergeOldIntoNew(new=data, old=self.data)
         return self.write(data)
     def mergeStr(self, jsonStr):

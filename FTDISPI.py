@@ -305,12 +305,14 @@ class Interface:
                 comparison[name]['old_data'] = prevData
                 self.fillDefaults(comparison)
         if display and len(comparison.keys()) > 0:
-            print(pre_display)
+            if pre_display:
+                print(pre_display)
             printStruct(comparison)
-            print(post_display)
+            if post_display:
+                print(post_display)
         return comparison
 
-    def trigger(self, display=True, pre_display=""):
+    def trigger(self, display=True, pre_display="", delay=.25):
         while(1):
             comp = self.compare(display=False)
             if len(comp.keys()) > 0:
@@ -318,14 +320,22 @@ class Interface:
                     print(pre_display)
                     printStruct(comp)
                 return comp
+            time.sleep(delay)
 
     def writeDefault(self, display=True):
         struct = self.writeStruct(self.defaultMap)
         return self.readState(display)
 
-    def writeBits(self, name, bitStrings=[], display=True):
+    def writeBits(self, name, bitStrings=[], display=True, compare=True):
+        if compare:
+            self.compare(display=display, pre_display="Changes before write:")
+        if display:
+            print("Writing...")
         struct = self.writeStruct( { name : bitMaskToBytes(bitStrings) }, display )
-        return struct
+        if compare:
+            self.currentState.merge(struct) # also merges everything into struct
+            self.compare(display=display, pre_display="Changes after write:")
+        return {name: struct[name]} # return only this name
 
     def writeBitsList(self, bitsList):
         for bits in bitsList:

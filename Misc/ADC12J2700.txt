@@ -1,0 +1,103 @@
+CFGA 0x000 0x3C R/W Configuration A Register
+CFGB 0x001 0x00 R Configuration B Register
+DEVCFG 0x002 0x00 R/W Device Configuration Register
+CHIP_TYPE 0x003 0x03 R Chip Type Register
+CHIP_VERSION 0x006 0x13 R Chip Version Register
+VENDOR_ID_0 0x00C 0x04 R Vendor Identification Register (1 of 2)
+VENDOR_ID_1 0x00D 0x51 R Vendor Identification Register (2 of 2)
+USR0 0x010 0x00 R/W User SPI Configuration Register
+POR 0x021 0x00 R/W Power-On Reset Register
+IO_GAIN_0 0x022 0x40 R/W I/O Gain 0 Register
+IO_GAIN_1 0x023 0x00 R/W I/O Gain 1 Register
+IO_OFFSET_0 0x025 0x40 R/W I/O Offset 0 Register
+IO_OFFSET_1 0x026 0x00 R/W I/O Offset 1 Register
+CLKGEN_0 0x030 0xC0 R/W Clock Generator Control 0 Register
+CLKGEN_1 0x031 0x07 R Clock Generator Status Register
+CLKGEN_2 0x032 0x80 R/W Clock Generator Control 2 Register
+ANA_MISC 0x033 0xC3 R/W Analog Miscellaneous Register
+IN_CL_EN 0x034 0x2F R/W Input Clamp Enable Register
+SER_CFG 0x040 0x04 R/W Serializer Configuration Register
+CAL_CFG0 0x050 0x06 R/W Calibration Configuration 0 Register
+CAL_CFG1 0x051 0xF4 R/W Calibration Configuration 1 Register
+CAL_BACK 0x057 0x10 R/W Calibration Background Control Register
+ADC_PAT_OVR_EN 0x058 0x00 R/W ADC Pattern and Over-Range Enable Register
+CAL_VECTOR 0x05A 0x00 R/W Calibration Vectors Register
+CAL_STAT 0x05B 0x00 R Calibration Status Register
+T_CAL 0x066 0x02 R/W Timing Calibration Register
+DDC_CTRL1 0x200 0x10 R/W Digital Down-Converter (DDC) Control
+JESD_CTRL1 0x201 0x0F R/W JESD204B Control 1
+JESD_CTRL2 0x202 0x00 R/W JESD204B Control 2
+JESD_DID 0x203 0x00 R/W JESD204B Device ID (DID)
+JESD_CTRL3 0x204 0x00 R/W JESD204B Control 3
+JESD_STATUS 0x205 0x00 R/W JESD204B and System Status Register
+OVR_T0 0x206 0xF2 R/W Overrange Threshold 0
+OVR_T1 0x207 0xAB R/W Overrange Threshold 1
+OVR_N 0x208 0x00 R/W Overrange Period
+NCO_MODE 0x20C 0x00 R/W DDC Configuration Preset Mode
+NCO_SEL 0x20D 0x00 R/W DDC Configuration Preset Select
+NCO_RDIV_0 0x20E 0x00 R/W Rational NCO Reference Divisor (1 of 2)
+NCO_RDIV_1 0x20F 0x00 R/W Rational NCO Reference Divisor (2 of 2)
+
+NCO_FREQ_0_0 0x210 0xC0 R/W NCO Frequency (Preset 0) (1 of 4)
+NCO_FREQ_0_1 0x211 0x00 R/W NCO Frequency (Preset 0) (2 of 4)
+NCO_FREQ_0_2 0x212 0x00 R/W NCO Frequency (Preset 0) (3 of 4)
+NCO_FREQ_0_3 0x213 0x00 R/W NCO Frequency (Preset 0) (4 of 4)
+NCO_PHASE_0_0 0x214 0x00 R/W NCO Phase (Preset 0) (1 of 2)
+NCO_PHASE_0_1 0x215 0x00 R/W NCO Phase (Preset 0) (2 of 2)
+DDC_DLY_0 0x216 0xFF R/W DDC Delay (Preset 0)
+
+NCO_FREQ_1_0 0x218 0xC0 R/W NCO Frequency (Preset 1)
+NCO_FREQ_1_1 0x219 0x00 R/W NCO Frequency (Preset 1)
+NCO_FREQ_1_2 0x21A 0x00 R/W NCO Frequency (Preset 1)
+NCO_FREQ_1_3 0x21B 0x00 R/W NCO Frequency (Preset 1)
+NCO_PHASE_1_0 0x21C 0x00 R/W NCO Phase (Preset 1)
+NCO_PHASE_1_1 0x21D 0x00 R/W NCO Phase (Preset 1)
+DDC_DLY_1 0x21E 0xFF R/W DDC Delay (Preset 1)
+
+NCO_FREQ_2_0 0x220 0xC0 R/W NCO Frequency (Preset 2) (1 of 4)
+NCO_FREQ_2_1 0x221 0x00 R/W NCO Frequency (Preset 2) (2 of 4)
+NCO_FREQ_2_2 0x222 0x00 R/W NCO Frequency (Preset 2) (3 of 4)
+NCO_FREQ_2_3 0x223 0x00 R/W NCO Frequency (Preset 2) (4 of 4)
+NCO_PHASE_2_0 0x224 0x00 R/W NCO Phase (Preset 2) (1 of 2)
+NCO_PHASE_2_1 0x225 0x00 R/W NCO Phase (Preset 2) (2 of 2)
+DDC_DLY_2 0x226 0xFF R/W DDC Delay (Preset 2)
+
+NCO_FREQ_3_0 0x228 0xC0 R/W NCO Frequency (Preset 3) (1 of 4)
+NCO_FREQ_3_1 0x229 0x00 R/W NCO Frequency (Preset 3) (2 of 4)
+NCO_FREQ_3_2 0x22A 0x00 R/W NCO Frequency (Preset 3) (3 of 4)
+NCO_FREQ_3_3 0x22B 0x00 R/W NCO Frequency (Preset 3) (4 of 4)
+NCO_PHASE_3_0 0x22C 0x00 R/W NCO Phase (Preset 3) (1 of 2)
+NCO_PHASE_3_1 0x22D 0x00 R/W NCO Phase (Preset 3) (2 of 2)
+DDC_DLY_3 0x22E 0xFF R/W DDC Delay (Preset 3)
+
+NCO_FREQ_4_0 0x230 0xC0 R/W NCO Frequency (Preset 4) (1 of 4)
+NCO_FREQ_4_1 0x231 0x00 R/W NCO Frequency (Preset 4) (2 of 4)
+NCO_FREQ_4_2 0x232 0x00 R/W NCO Frequency (Preset 4) (3 of 4)
+NCO_FREQ_4_3 0x233 0x00 R/W NCO Frequency (Preset 4) (4 of 4)
+NCO_PHASE_4_0 0x234 0x00 R/W NCO Phase (Preset 4) (1 of 2)
+NCO_PHASE_4_1 0x235 0x00 R/W NCO Phase (Preset 4) (2 of 2)
+DDC_DLY_4 0x236 0xFF R/W DDC Delay (Preset 4)
+
+NCO_FREQ_5_0 0x238 0xC0 R/W NCO Frequency (Preset 5) (1 of 4)
+NCO_FREQ_5_1 0x239 0x00 R/W NCO Frequency (Preset 5) (2 of 4)
+NCO_FREQ_5_2 0x23A 0x00 R/W NCO Frequency (Preset 5) (3 of 4)
+NCO_FREQ_5_3 0x23B 0x00 R/W NCO Frequency (Preset 5) (4 of 4)
+NCO_PHASE_5_0 0x23C 0x00 R/W NCO Phase (Preset 5) (1 of 2)
+NCO_PHASE_5_1 0x23D 0x00 R/W NCO Phase (Preset 5) (2 of 2)
+DDC_DLY_5 0x23E 0xFF R/W DDC Delay (Preset 5)
+
+NCO_FREQ_6_0 0x240 0xC0 R/W NCO Frequency (Preset 6) (1 of 4)
+NCO_FREQ_6_1 0x241 0x00 R/W NCO Frequency (Preset 6) (2 of 4)
+NCO_FREQ_6_2 0x242 0x00 R/W NCO Frequency (Preset 6) (3 of 4)
+NCO_FREQ_6_3 0x243 0x00 R/W NCO Frequency (Preset 6) (4 of 4)
+NCO_PHASE_6_0 0x244 0x00 R/W NCO Phase (Preset 6) (1 of 2)
+NCO_PHASE_6_1 0x245 0x00 R/W NCO Phase (Preset 6) (2 of 2)
+DDC_DLY_6 0x246 0xFF R/W DDC Delay (Preset 6)
+
+NCO_FREQ_7_0 0x248 0xC0 R/W NCO Frequency (Preset 7) (1 of 4)
+NCO_FREQ_7_1 0x249 0x00 R/W NCO Frequency (Preset 7) (2 of 4)
+NCO_FREQ_7_2 0x24A 0x00 R/W NCO Frequency (Preset 7) (3 of 4)
+NCO_FREQ_7_3 0x24B 0x00 R/W NCO Frequency (Preset 7) (4 of 4)
+NCO_PHASE_7_0 0x24C 0x00 R/W NCO Phase (Preset 7) (1 of 2)
+NCO_PHASE_7_1 0x24D 0x00 R/W NCO Phase (Preset 7) (2 of 2)
+DDC_DLY_7 0x24E 0xFF R/W DDC Delay (Preset 7)

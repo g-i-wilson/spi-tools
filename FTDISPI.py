@@ -340,3 +340,65 @@ class Interface:
     def writeBitsList(self, bitsList):
         for bits in bitsList:
             self.writeBits(name=bits[0], bitStrings=bits[1])
+
+
+
+
+
+
+def ui_hex(str):
+    return int(str,16)
+
+def uiLoopHelp():
+    print()
+    print("Command set:")
+    print()
+    print("write <REG_NAME> XXXX1010 1XXXXXX0       | Write bits (any char not 0 or 1 is a don't-care)")
+    print("read <REG_NAME>                          | Read register")
+    print("all                                      | Read all registers")
+    print("save <fileName>                          | Save registers to JSON file")
+    print("load <fileName>                          | Load and write registers from JSON file")
+    print("loadDefault                              | Load datasheet default JSON configuration")
+    print("help                                     | Print this command set")
+    print("exit                                     | Exit the program")
+
+def uiLoop(spiObject, printHelp=True):
+    if printHelp:
+        uiLoopHelp()
+    jsonObject = None
+    ui = [""]
+    while (ui[0] != "exit"):
+        print("\n> ", end='')
+        ui = sys.stdin.readline().rstrip().split(' ')
+
+        if (ui[0] == "read"):
+            spiObject.readStruct({ ui[1] : {} }, display=True)
+        if (ui[0] == "write"):
+            dataRegs = []
+            for i in range(2,len(ui)):
+                dataRegs.append( ui[i] )
+            spiObject.writeBits( ui[1], dataRegs )
+        if (ui[0] == "all"):
+            spiObject.readState()
+        if (ui[0] == "compare"):
+            spiObject.compare()
+        if (ui[0] == "trigger"):
+            while(1):
+                spiObject.trigger(pre_display=chr(27)+"[2J")
+                time.sleep(1)
+        if (ui[0] == "save"):
+            if jsonObject is None:
+                if len(ui) > 1:
+                    jsonObject = JSONFile.new(ui[1])
+                else:
+                    jsonObject = JSONFile.new(input("\nSave as: "))
+            jsonObject.write( spiObject.readState() )
+        if (ui[0] == "load"):
+            if jsonObject is None:
+                jsonObject = JSONFile.load(ui[1])
+            spiObject.writeStruct(jsonObject.read())
+            spiObject.readState()
+        if (ui[0] == "loadDefault"):
+            spiObject.writeDefault()
+        if (ui[0] == "help"):
+            uiLoopHelp()

@@ -186,6 +186,11 @@ class GPIO:
                 mosiByte = 0x00
                 misoByte = 0x00
                 bitPlace = 7
+        if dbg:
+            print("MOSI: ")
+            print(mosiArray)
+            print("MISO: ")
+            print(misoArray)
         return [mosiArray, misoArray]
 
 
@@ -222,14 +227,18 @@ class Interface:
     def __init__(self, rwObject, defaultMap, currentState, previousState):
         self.rwObject = rwObject
         # default register map
-        self.defaultMap = JSONFile.load(defaultMap).read()
+        defaultMapFile = JSONFile.load(defaultMap)
+        if not defaultMapFile.fileExists():
+            print("Unable to load "+defaultMap)
+            exit()
+        self.defaultMap = defaultMapFile.read()
         # states for comparison
         self.previousState = JSONFile.load(previousState)
-        if self.previousState is None:
+        if not self.previousState.fileExists():
             print("Unable to load "+currentState)
             exit()
         self.currentState = JSONFile.load(currentState)
-        if self.currentState is None:
+        if not self.currentState.fileExists():
             print("Unable to load "+currentState)
             exit()
 
@@ -253,7 +262,7 @@ class Interface:
                 for step in struct[name]['pre_w']: # ...is a list
                     for pre_name in step: # step is a dictionary with one key
                         if dbg:
-                            print("Write: "+pre_name+", "+printByteList(createByteList(struct[name]['addr_w'], step[pre_name])))
+                            print("Write: "+pre_name+", "+printByteList( createByteList(self.defaultMap[pre_name]['addr_w'], step[pre_name]) ))
                         self.rwObject.write( createByteList(self.defaultMap[pre_name]['addr_w'], step[pre_name]) )
             if dbg:
                 print("Write: "+name+", "+printByteList(createByteList(struct[name]['addr_w'], struct[name]['data'])))
@@ -269,7 +278,7 @@ class Interface:
                 for step in struct[name]['pre_r']: # ...is a list
                     for pre_name in step: # step is a dictionary with one key
                         if dbg:
-                            print("Write: "+pre_name+", "+printByteList(createByteList(struct[name]['addr_w'], step[pre_name])))
+                            print("Write: "+pre_name+", "+printByteList( createByteList(self.defaultMap[pre_name]['addr_w'], step[pre_name]) ))
                         self.rwObject.write( createByteList(self.defaultMap[pre_name]['addr_w'], step[pre_name]) )
             struct[name]['data'] = self.rwObject.read( struct[name]['addr_r'], len(struct[name]['data']) )
             if dbg:

@@ -32,19 +32,23 @@ class JSONFile:
     def __init__(self, filePath, data={}):
         self.filePath = filePath
         self.data = data
+        self.exists = False
         if debug:
-            print("Initialized JSONFile object with "+filePath)
+            print("Initialized JSONFile object with filepath string '"+filePath+"'")
     def load(self):
         ret = None
+        file = None
         try:
             file = open(self.filePath, "r")
             self.data = json.load(file)
             ret = self.data
+            self.exists = True
         except:
             if debug:
-                print("Failed to read from: "+filePath)
+                print("Failed to read from: "+self.filePath)
         finally:
-            file.close()
+            if file:
+                file.close()
         return ret
     def read(self):
         return self.data
@@ -56,6 +60,7 @@ class JSONFile:
             file = open(self.filePath, "w")
             json.dump(self.data, file)
             ret = self.data
+            self.exists = True
         except:
             if debug:
                 print("Failed to write to: "+filePath)
@@ -83,6 +88,8 @@ class JSONFile:
             if debug:
                 print("Failed to parse JSON string: "+str)
             return None
+    def fileExists(self):
+        return self.exists
 
 
 if __name__== "__main__":

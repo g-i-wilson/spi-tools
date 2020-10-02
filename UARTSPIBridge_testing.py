@@ -1,5 +1,6 @@
 import FTDISPI
+import sys
 
-bridge = FTDISPI.UARTSPIBridge( port="/dev/ttyUSB0" )
+bridge = FTDISPI.UARTSPIBridge( port=sys.argv[1] )
 
-print( bridge.read([0x55], 1) )
+print( bridge.read([ int(sys.argv[2],16) ], 1) )

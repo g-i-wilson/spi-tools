@@ -222,10 +222,6 @@ class MPSSE:
         return byteList
 
 
-def blockUntilTrue(something):
-    while(1):
-        if something:
-            return
 
 class UARTSPIBridge:
     def __init__(self, port="/dev/ttyUSB0", baudrate="9600"):
@@ -233,46 +229,60 @@ class UARTSPIBridge:
         if self.serial.is_open:
             self.serial.close()
         self.serial.open()
-        self.serial.flush()
     def read(self, byteList, readLen):
         # send write-length byte, read-length byte, and first data byte
-        self.serial.write( [ len(byteList), readLen ] );
+        self.serial.write( [ len(byteList) ] )
+        self.serial.write( [ readLen ] );
+        #print([ len(byteList) ])
+        #print([ readLen ])
         if len(byteList) > 0:
             self.serial.write( [ byteList[0] ] )
-        self.serial.write( [ 0x0A ] ) # newline char
+            #print([ byteList[0] ])
+        #self.serial.write( [ 0x0A ] ) # newline char
+        #print([ 0x0A ])
         self.serial.flush()
-        time.sleep(0.1)
+        # time.sleep(0.1)
         # read acknowledgement bytes
+        #print("hi0")
         lenBytes = []
-        # blockUntilTrue(self.serial.inWaiting())
+        #print(self.serial.inWaiting())
+        while(not self.serial.inWaiting()):
+            pass
         lenBytes.append( self.serial.read(1) )
-        print("hi1")
-        print(lenBytes)
-        time.sleep(0.1)
-        # blockUntilTrue(self.serial.inWaiting())
+        #print("hi1")
+        #print(lenBytes)
+        # time.sleep(0.1)
+        while(not self.serial.inWaiting()):
+            pass
         lenBytes.append( self.serial.read(1) )
-        print("hi2")
-        print(lenBytes)
+        #print("hi2")
+        #print(lenBytes)
         if lenBytes[0] != len(byteList).to_bytes(1,'big') or lenBytes[1] != readLen.to_bytes(1,'big'):
             print("Error communicating with UARTSPIBridge")
             print("W length received: "+str(lenBytes[0])+" != "+str(byteList[0].to_bytes(1,'big')))
             print("R length received: "+str(lenBytes[1])+" != "+str(byteList[1].to_bytes(1,'big')))
-            #return []
-        time.sleep(0.1)
-        # blockUntilTrue(self.serial.inWaiting())
-        print("hi3")
-        self.serial.read(1) # ack byte from first data-write byte
+            return []
+        # time.sleep(0.1)
+        while(not self.serial.inWaiting()):
+            pass
+        #print("hi3")
+        lastByte = self.serial.read(1) # ack byte from first data-write byte
+        #print(lastByte)
         # write the remainder of byteList
         for i in range(1,len(byteList)):
-            self.serial.write(outByte[i])
-            self.serial.write( 0x0A ) # newline char
+            self.serial.write( [ outByte[i] ] )
+            #self.serial.write( [ 0x0A ] ) # newline char
             self.serial.flush()
-            blockUntilTrue(self.serial.inWaiting())
-            self.serial.read(1) # ack byte for each data-write byte
+            while(not self.serial.inWaiting()):
+                pass
+            lastByte = self.serial.read(1) # ack byte for each data-write byte
+            #print(lastByte)
         inList = []
         for i in range(readLen):
-            blockUntilTrue(self.serial.inWaiting())
+            while(not self.serial.inWaiting()):
+                pass
             inList.append( self.serial.read(1) )
+        #print(inList)
         return inList
     def write(self, byteList):
         return self.read(byteList, 0);

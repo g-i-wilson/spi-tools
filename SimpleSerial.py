@@ -1,7 +1,7 @@
 import sys
 import serial
 
-port = "/dev/ttyUSB0"
+port = "/dev/ttyUSB1"
 io = serial.Serial(port=port, baudrate="9600")
 
 ui = [""]

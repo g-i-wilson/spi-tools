@@ -44,8 +44,8 @@ class JSONFile:
             ret = self.data
             self.exists = True
         except:
-            if debug:
-                print("Failed to read from: "+self.filePath)
+            # if debug:
+            print("Failed to read from: "+self.filePath)
         finally:
             if file:
                 file.close()
@@ -62,8 +62,8 @@ class JSONFile:
             ret = self.data
             self.exists = True
         except:
-            if debug:
-                print("Failed to write to: "+filePath)
+            # if debug:
+            print("Failed to write to: "+filePath)
         finally:
             file.close()
         return ret
@@ -72,8 +72,8 @@ class JSONFile:
             jsonData = json.loads(str)
             return self.write(jsonData)
         except:
-            if debug:
-                print("Failed to parse JSON string: "+str)
+            # if debug:
+            print("Failed to parse JSON string: "+str)
             return None
     def merge(self, data):
         if debug:
@@ -85,8 +85,8 @@ class JSONFile:
             data = json.loads(jsonStr)
             return self.merge(data)
         except:
-            if debug:
-                print("Failed to parse JSON string: "+str)
+            # if debug:
+            print("Failed to parse JSON string: "+str)
             return None
     def fileExists(self):
         return self.exists

@@ -418,8 +418,16 @@ class Interface:
         for bits in bitsList:
             self.writeBits(name=bits[0], bitStrings=bits[1])
 
-
-
+    def writeCSV(self, csvFilePath):
+        print("Writing raw bytes from CSV file...")
+        csvFile = open(csvFilePath, "r")
+        print("Opened file: "+csvFilePath)
+        for line in csvFile.readlines():
+            byteList = []
+            for aByte in line.rstrip().split(','):
+                byteList.append( int(aByte,16) )
+            print(byteList)
+            self.writeRaw( byteList )
 
 
 
@@ -440,6 +448,7 @@ def uiLoopHelp():
     print("loadDefault                              | Load datasheet default JSON configuration")
     print("help                                     | Print this command set")
     print("exit                                     | Exit the program")
+
 
 def uiLoop(spiObject, printHelp=True):
     if printHelp:
@@ -478,15 +487,7 @@ def uiLoop(spiObject, printHelp=True):
             spiObject.writeStruct(jsonObject.read())
             spiObject.readState()
         if (ui[0] == "loadCSV"):
-            print("Writing raw bytes from CSV file...")
-            csvFile = open(ui[1], "r")
-            print("Opened file: "+ui[1])
-            for line in csvFile.readlines():
-                byteList = []
-                for aByte in line.rstrip().split(','):
-                    byteList.append( int(aByte,16) )
-                print(byteList)
-                spiObject.writeRaw( byteList )
+            spiObject.writeCSV(ui[1])
             print("Comparing changes...")
             spiObject.compare()
         if (ui[0] == "writeRaw"):

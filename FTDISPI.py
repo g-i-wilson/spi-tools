@@ -431,11 +431,12 @@ def uiLoopHelp():
     print("Command set:")
     print()
     print("write <REG_NAME> XXXX1010 1XXXXXX0       | Write bits (any char not 0 or 1 is a don't-care)")
+    print("writeRaw 0xXX 0xXX 0xXX                  | Write a raw sequence of bytes")
     print("read <REG_NAME>                          | Read register")
     print("all                                      | Read all registers")
     print("save <fileName>                          | Save registers to JSON file")
     print("load <fileName>                          | Load and write registers from JSON file")
-    print("loadRaw <fileName>                       | Write bytes from CSV file (each line is one transaction)")
+    print("loadCSV <fileName>                       | Write bytes from CSV file (each line is one transaction)")
     print("loadDefault                              | Load datasheet default JSON configuration")
     print("help                                     | Print this command set")
     print("exit                                     | Exit the program")
@@ -476,9 +477,8 @@ def uiLoop(spiObject, printHelp=True):
                 jsonObject = JSONFile.load(ui[1])
             spiObject.writeStruct(jsonObject.read())
             spiObject.readState()
-        if (ui[0] == "loadRaw"):
+        if (ui[0] == "loadCSV"):
             print("Writing raw bytes from CSV file...")
-            # try:
             csvFile = open(ui[1], "r")
             print("Opened file: "+ui[1])
             for line in csvFile.readlines():
@@ -488,9 +488,14 @@ def uiLoop(spiObject, printHelp=True):
                 print(byteList)
                 spiObject.writeRaw( byteList )
             print("Comparing changes...")
-            spiObject.compare()
-            # except:
-            #     print("Error loading '"+ui[1]+"'!")
+            spiObject.compare()all
+        if (ui[0] == "writeRaw"):
+            print("Writing raw bytes...")
+            byteList = []
+            for i in range(1,len(ui)):
+                byteList.append( int(ui[i],16) )
+            print(byteList)
+            spiObject.writeRaw( byteList )
         if (ui[0] == "loadDefault"):
             spiObject.writeDefault()
         if (ui[0] == "help"):

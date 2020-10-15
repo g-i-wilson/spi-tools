@@ -308,6 +308,8 @@ class Interface:
             print("Unable to load "+currentState)
             exit()
 
+    def writeRaw(self, byteList):
+        self.rwObject.write(byteList)
 
     def fillDefaults(self, struct={}):
         for name in struct:
@@ -433,6 +435,7 @@ def uiLoopHelp():
     print("all                                      | Read all registers")
     print("save <fileName>                          | Save registers to JSON file")
     print("load <fileName>                          | Load and write registers from JSON file")
+    print("loadRaw <fileName>                       | Write bytes from CSV file (each line is one transaction)")
     print("loadDefault                              | Load datasheet default JSON configuration")
     print("help                                     | Print this command set")
     print("exit                                     | Exit the program")
@@ -473,6 +476,21 @@ def uiLoop(spiObject, printHelp=True):
                 jsonObject = JSONFile.load(ui[1])
             spiObject.writeStruct(jsonObject.read())
             spiObject.readState()
+        if (ui[0] == "loadRaw"):
+            print("Writing raw bytes from CSV file...")
+            # try:
+            csvFile = open(ui[1], "r")
+            print("Opened file: "+ui[1])
+            for line in csvFile.readlines():
+                byteList = []
+                for aByte in line.rstrip().split(','):
+                    byteList.append( int(aByte,16) )
+                print(byteList)
+                spiObject.writeRaw( byteList )
+            print("Comparing changes...")
+            spiObject.compare()
+            # except:
+            #     print("Error loading '"+ui[1]+"'!")
         if (ui[0] == "loadDefault"):
             spiObject.writeDefault()
         if (ui[0] == "help"):

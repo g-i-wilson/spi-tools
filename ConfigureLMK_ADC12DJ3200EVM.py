@@ -30,6 +30,8 @@ lmk = FTDISPI.Interface( \
 )
 
 
-lmk.writeCSV(sys.argv[1])
-print("*** LMK ***")
-lmk.readState()
+# lmk.writeCSV(sys.argv[1])
+# print("*** LMK ***")
+# lmk.readState()
+
+FTDISPI.uiLoop(lmk)

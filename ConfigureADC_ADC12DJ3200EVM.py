@@ -20,6 +20,8 @@ adc = FTDISPI.Interface( \
 )
 
 
-adc.writeCSV(sys.argv[1])
-print("*** ADC ***")
-adc.readState()
+# adc.writeCSV(sys.argv[1])
+# print("*** ADC ***")
+# adc.readState()
+
+FTDISPI.uiLoop(adc)

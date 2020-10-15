@@ -488,7 +488,7 @@ def uiLoop(spiObject, printHelp=True):
                 print(byteList)
                 spiObject.writeRaw( byteList )
             print("Comparing changes...")
-            spiObject.compare()all
+            spiObject.compare()
         if (ui[0] == "writeRaw"):
             print("Writing raw bytes...")
             byteList = []

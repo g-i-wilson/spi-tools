@@ -3,18 +3,33 @@ import serial
 
 io = serial.Serial(port=sys.argv[1], baudrate=sys.argv[2])
 
-file = None
-if len(sys.argv) > 3:
-    file = open(sys.argv[3], "wb")
+groupSize = 3
 
+if len(sys.argv) > 3:
+    groupSize = int(sys.argv[3])
+
+file = None
+if len(sys.argv) > 4:
+    file = open(sys.argv[4], "wb")
+
+
+
+byteNumber = 0
 while (1):
-    if file:
-        file.write( io.read(1) )
-    else:
-        # sys.stdout.buffer.write( io.read(1) )
-        # sys.stdout.flush()
-        theByte = io.read(1)
-        if theByte != b'\n':
-            print( "0x{:02x}".format(int.from_bytes(theByte,'big')), end=',' )
+    # waiting = io.inWaiting()
+    # print(io.inWaiting())
+    if (io.inWaiting()>0):
+        # print("data!")
+        byteNumber += 1
+        if file:
+            file.write( io.read() )
         else:
-            print()
+            # sys.stdout.buffer.write( io.read(1) )
+            # sys.stdout.flush()
+            theByte = io.read()
+            if byteNumber < groupSize:
+                print( "0x{:02x}".format(int.from_bytes(theByte,'big')), end=',' )
+            elif byteNumber == groupSize:
+                print( "0x{:02x}".format(int.from_bytes(theByte,'big')), end='' )
+                byteNumber = 0
+                print()

@@ -1,0 +1,107 @@
+
+Command set:
+
+write <REG_NAME> XXXX1010 1XXXXXX0       | Write bits (any char not 0 or 1 is a don't-care)
+writeRaw 0xXX 0xXX 0xXX                  | Write a raw sequence of bytes
+read <REG_NAME>                          | Read register
+all                                      | Read all registers
+save <fileName>                          | Save registers to JSON file
+load <fileName>                          | Load and write registers from JSON file
+loadCSV <fileName>                       | Write bytes from CSV file (each line is one transaction)
+loadDefault                              | Load datasheet default JSON configuration
+help                                     | Print this command set
+exit                                     | Exit the program
+
+> CONFIG_A           0x00 0x00   |  0x30 0[0m0[0m1[0m1[0m0[0m0[0m0[0m0[0m    |  
+DEVICE_CONFIG      0x00 0x02   |  0x00 0[0m0[0m0[0m0[0m0[0m0[0m0[0m0[0m    |  
+CHIP_TYPE          0x00 0x03   |  0x03 0[0m0[0m0[0m0[0m0[0m0[0m1[0m1[0m    |  
+CHIP_ID_0          0x00 0x04   |  0x20 0[0m0[0m1[0m0[0m0[0m0[0m0[0m0[0m    |  R Chip ID Registers
+CHIP_ID_1          0x00 0x05   |  0x00 0[0m0[0m0[0m0[0m0[0m0[0m0[0m0[0m    |  R Chip ID Registers
+CHIP_VERSION       0x00 0x06   |  0x0a 0[0m0[0m0[0m0[0m1[0m0[0m1[0m0[0m    |  
+VENDOR_ID_0        0x00 0x0c   |  0x51 0[0m1[0m0[0m1[0m0[0m0[0m0[0m1[0m    |  R Vendor Identification Register
+VENDOR_ID_1        0x00 0x0d   |  0x04 0[0m0[0m0[0m0[0m0[0m1[0m0[0m0[0m    |  R Vendor Identification Register
+USR0               0x00 0x10   |  0x00 0[0m0[0m0[0m0[0m0[0m0[0m0[0m0[0m    |  
+CLK_CTRL0          0x00 0x29   |  0x00 0[0m0[0m0[0m0[0m0[0m0[0m0[0m0[0m    |  
+CLK_CTRL1          0x00 0x2a   |  0x20 0[0m0[0m1[0m0[0m0[0m0[0m0[0m0[0m    |  
+FS_RANGE_A_0       0x00 0x30   |  0x00 0[0m0[0m0[0m0[0m0[0m0[0m0[0m0[0m    |  R/W INA Full-Scale Range Adjust Register
+FS_RANGE_A_1       0x00 0x31   |  0xa0 1[0m0[0m1[0m0[0m0[0m0[0m0[0m0[0m    |  R/W INA Full-Scale Range Adjust Register
+FS_RANGE_B_0       0x00 0x32   |  0x00 0[0m0[0m0[0m0[0m0[0m0[0m0[0m0[0m    |  R/W INB Full-Scale Range Adjust Register
+FS_RANGE_B_1       0x00 0x33   |  0xa0 1[0m0[0m1[0m0[0m0[0m0[0m0[0m0[0m    |  R/W INB Full-Scale Range Adjust Register
+BG_BYPASS          0x00 0x38   |  0x00 0[0m0[0m0[0m0[0m0[0m0[0m0[0m0[0m    |  
+TMSTP_CTRL         0x00 0x3b   |  0x00 0[0m0[0m0[0m0[0m0[0m0[0m0[0m0[0m    |  
+SER_PE             0x00 0x48   |  0x00 0[0m0[0m0[0m0[0m0[0m0[0m0[0m0[0m    |  
+INPUT_MUX          0x00 0x60   |  0x01 0[0m0[0m0[0m0[0m0[0m0[0m0[0m1[0m    |  
+CAL_EN             0x00 0x61   |  0x01 0[0m0[0m0[0m0[0m0[0m0[0m0[0m1[0m    |  
+CAL_CFG0           0x00 0x62   |  0x01 0[0m0[0m0[0m0[0m0[0m0[0m0[0m1[0m    |  
+CAL_PIN_CFG        0x00 0x6b   |  0x00 0[0m0[0m0[0m0[0m0[0m0[0m0[0m0[0m    |  
+CAL_SOFT_TRIG      0x00 0x6c   |  0x01 0[0m0[0m0[0m0[0m0[0m0[0m0[0m1[0m    |  
+CAL_LP             0x00 0x6e   |  0x88 1[0m0[0m0[0m0[0m1[0m0[0m0[0m0[0m    |  
+CAL_DATA_EN        0x00 0x70   |  0x00 0[0m0[0m0[0m0[0m0[0m0[0m0[0m0[0m    |  
+OSFILT0            0x00 0x97   |  0x00 0[0m0[0m0[0m0[0m0[0m0[0m0[0m0[0m    |  
+OSFILT1            0x00 0x98   |  0x33 0[0m0[0m1[0m1[0m0[0m0[0m1[0m1[0m    |  
+ENC_LSB            0x01 0x60   |  0x00 0[0m0[0m0[0m0[0m0[0m0[0m0[0m0[0m    |  
+JESD_EN            0x02 0x00   |  0x01 0[0m0[0m0[0m0[0m0[0m0[0m0[0m1[0m    |  
+JMODE              0x02 0x01   |  0x02 0[0m0[0m0[0m0[0m0[0m0[0m1[0m0[0m    |  
+KM1                0x02 0x02   |  0x1f 0[0m0[0m0[0m1[0m1[0m1[0m1[0m1[0m    |  
+JSYNC_N            0x02 0x03   |  0x01 0[0m0[0m0[0m0[0m0[0m0[0m0[0m1[0m    |  
+JCTRL              0x02 0x04   |  0x02 0[0m0[0m0[0m0[0m0[0m0[0m1[0m0[0m    |  
+JTEST              0x02 0x05   |  0x00 0[0m0[0m0[0m0[0m0[0m0[0m0[0m0[0m    |  
+DID                0x02 0x06   |  0x00 0[0m0[0m0[0m0[0m0[0m0[0m0[0m0[0m    |  
+FCHAR              0x02 0x07   |  0x00 0[0m0[0m0[0m0[0m0[0m0[0m0[0m0[0m    |  
+PD_CH              0x02 0x09   |  0x00 0[0m0[0m0[0m0[0m0[0m0[0m0[0m0[0m    |  
+JEXTRA_A           0x02 0x0a   |  0x00 0[0m0[0m0[0m0[0m0[0m0[0m0[0m0[0m    |  
+JEXTRA_B           0x02 0x0b   |  0x00 0[0m0[0m0[0m0[0m0[0m0[0m0[0m0[0m    |  
+DDC_CFG            0x02 0x10   |  0x00 0[0m0[0m0[0m0[0m0[0m0[0m0[0m0[0m    |  
+OVR_T0             0x02 0x11   |  0xf2 1[0m1[0m1[0m1[0m0[0m0[0m1[0m0[0m    |  
+OVR_T1             0x02 0x12   |  0xab 1[0m0[0m1[0m0[0m1[0m0[0m1[0m1[0m    |  
+OVR_CFG            0x02 0x13   |  0x07 0[0m0[0m0[0m0[0m0[0m1[0m1[0m1[0m    |  
+CMODE              0x02 0x14   |  0x00 0[0m0[0m0[0m0[0m0[0m0[0m0[0m0[0m    |  
+CSEL               0x02 0x15   |  0x00 0[0m0[0m0[0m0[0m0[0m0[0m0[0m0[0m    |  
+DIG_BIND           0x02 0x16   |  0x02 0[0m0[0m0[0m0[0m0[0m0[0m1[0m0[0m    |  
+NCO_RDIV_0         0x02 0x17   |  0x00 0[0m0[0m0[0m0[0m0[0m0[0m0[0m0[0m    |  R/W Rational NCO Reference Divisor Register
+NCO_RDIV_1         0x02 0x18   |  0x00 0[0m0[0m0[0m0[0m0[0m0[0m0[0m0[0m    |  R/W Rational NCO Reference Divisor Register
+NCO_SYNC           0x02 0x19   |  0x02 0[0m0[0m0[0m0[0m0[0m0[0m1[0m0[0m    |  
+PHASEA0_0          0x02 0x24   |  0x00 0[0m0[0m0[0m0[0m0[0m0[0m0[0m0[0m    |  R/W NCO Phase (DDC A Preset 0)
+PHASEA0_1          0x02 0x25   |  0x00 0[0m0[0m0[0m0[0m0[0m0[0m0[0m0[0m    |  R/W NCO Phase (DDC A Preset 0)
+PHASEA1_0          0x02 0x2c   |  0x00 0[0m0[0m0[0m0[0m0[0m0[0m0[0m0[0m    |  R/W NCO Phase (DDC A Preset 1)
+PHASEA1_1          0x02 0x2d   |  0x00 0[0m0[0m0[0m0[0m0[0m0[0m0[0m0[0m    |  R/W NCO Phase (DDC A Preset 1)
+PHASEA2_0          0x02 0x34   |  0x00 0[0m0[0m0[0m0[0m0[0m0[0m0[0m0[0m    |  R/W NCO Phase (DDC A Preset 2)
+PHASEA2_1          0x02 0x35   |  0x00 0[0m0[0m0[0m0[0m0[0m0[0m0[0m0[0m    |  R/W NCO Phase (DDC A Preset 2)
+PHASEA3_0          0x02 0x3c   |  0x00 0[0m0[0m0[0m0[0m0[0m0[0m0[0m0[0m    |  R/W NCO Phase (DDC A Preset 3)
+PHASEA3_1          0x02 0x3d   |  0x00 0[0m0[0m0[0m0[0m0[0m0[0m0[0m0[0m    |  R/W NCO Phase (DDC A Preset 3)
+PHASEB0_0          0x02 0x44   |  0x00 0[0m0[0m0[0m0[0m0[0m0[0m0[0m0[0m    |  R/W NCO Phase (DDC B Preset 0)
+PHASEB0_1          0x02 0x45   |  0x00 0[0m0[0m0[0m0[0m0[0m0[0m0[0m0[0m    |  R/W NCO Phase (DDC B Preset 0)
+PHASEB1_0          0x02 0x4c   |  0x00 0[0m0[0m0[0m0[0m0[0m0[0m0[0m0[0m    |  
+PHASEB1_1          0x02 0x4d   |  0x00 0[0m0[0m0[0m0[0m0[0m0[0m0[0m0[0m    |  
+PHASEB2_0          0x02 0x54   |  0x00 0[0m0[0m0[0m0[0m0[0m0[0m0[0m0[0m    |  
+PHASEB2_1          0x02 0x55   |  0x00 0[0m0[0m0[0m0[0m0[0m0[0m0[0m0[0m    |  
+PHASEB3_0          0x02 0x5c   |  0x00 0[0m0[0m0[0m0[0m0[0m0[0m0[0m0[0m    |  
+PHASEB3_1          0x02 0x5d   |  0x00 0[0m0[0m0[0m0[0m0[0m0[0m0[0m0[0m    |  
+SRC_EN             0x02 0xb0   |  0x00 0[0m0[0m0[0m0[0m0[0m0[0m0[0m0[0m    |  
+SRC_CFG            0x02 0xb1   |  0x05 0[0m0[0m0[0m0[0m0[0m1[0m0[0m1[0m    |  
+TAD                0x02 0xb7   |  0x00 0[0m0[0m0[0m0[0m0[0m0[0m0[0m0[0m    |  
+TAD_RAMP           0x02 0xb8   |  0x00 0[0m0[0m0[0m0[0m0[0m0[0m0[0m0[0m    |  
+ALM_STATUS         0x02 0xc1   |  0x1f 0[0m0[0m0[0m1[0m1[0m1[0m1[0m1[0m    |  
+ALM_MASK           0x02 0xc2   |  0x1f 0[0m0[0m0[0m1[0m1[0m1[0m1[0m1[0m    |  
+
+> Writing raw bytes from CSV file...
+Opened file: adc_config_SFORMAT.csv
+[0, 0, 176]
+[2, 0, 0]
+[0, 97, 0]
+[2, 1, 0]
+[2, 2, 3]
+[2, 4, 3]
+[2, 19, 7]
+[0, 72, 3]
+[0, 97, 1]
+[2, 0, 1]
+[0, 108, 0]
+[0, 108, 1]
+Comparing changes...
+SER_PE             [92m0x00 [0m[92m0x48 [0m  |  0x03 0[0m0[0m0[0m0[0m0[0m0[0m[92m1[0m[92m1[0m    |  
+JMODE              [92m0x02 [0m[92m0x01 [0m  |  0x00 0[0m0[0m0[0m0[0m0[0m0[0m[31m0[0m0[0m    |  
+KM1                [92m0x02 [0m[92m0x02 [0m  |  0x03 0[0m0[0m0[0m[31m0[0m[31m0[0m[31m0[0m1[0m1[0m    |  
+JCTRL              [92m0x02 [0m[92m0x04 [0m  |  0x03 0[0m0[0m0[0m0[0m0[0m0[0m1[0m[92m1[0m    |  
+
+> 

@@ -5,6 +5,8 @@ from datetime import datetime
 from time import sleep
 import os
 
+# Active-low reset
+comeOutOfReset = DigitalOutputDevice(18, active_high=True)
 
 red = LED(2, active_high=False)
 green = LED(4, active_high=False)
@@ -22,5 +24,8 @@ os.system('printf "all\nloadCSV adc_config_SFORMAT.csv\nexit\n" | python3 Config
 
 red.off()
 green.on()
+
+sleep(5)
+comeOutOfReset.on()
 
 pause()
